@@ -84,7 +84,10 @@ const YamlEditor: React.FC = () => {
     setJsonObjects((prev) => {
       const updated = [...prev]; // Create a copy of the previous JSON objects array
       updateNestedObject(updated[index], path, newValue); // Update the nested key with the new value
-      setValue(updated.map((item) => yamlStringify(item)).join("---\n")); // Update the editor content with the updated YAML string
+      const updatedYaml = updated
+        .map((item) => yamlStringify(item))
+        .join("---\n");
+      setValue(updatedYaml); // Update the editor content with the updated YAML string
       return updated; // Return the updated JSON objects array
     });
   };
@@ -118,6 +121,18 @@ const YamlEditor: React.FC = () => {
         </div>
       );
     });
+  };
+
+  // Function to handle changes in the CodeMirror editor
+  const handleEditorChange = (newValue: string) => {
+    setValue(newValue);
+    try {
+      const parsedDocuments = parseAllDocuments(newValue);
+      const parsedObjects = parsedDocuments.map((doc) => doc.toJSON());
+      setJsonObjects(parsedObjects);
+    } catch (error) {
+      console.error("Error parsing YAML:", error);
+    }
   };
 
   return (
@@ -177,7 +192,7 @@ const YamlEditor: React.FC = () => {
               width="400px"
               theme={oneDark}
               extensions={[yaml()]}
-              onChange={(value) => setValue(value)}
+              onChange={(value) => handleEditorChange(value)}
             />
           </div>
         </div>
