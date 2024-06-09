@@ -165,7 +165,6 @@ const YamlEditor: React.FC = () => {
                 <div key={index}>
                   <h3>Document {index + 1}</h3>
                   {renderInputs(obj, index)}
-                  JSON object
                 </div>
               ))}
             </div>
