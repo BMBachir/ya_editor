@@ -7,7 +7,7 @@ import { parseAllDocuments, stringify as yamlStringify } from "yaml";
 import { parse as jsonParse, stringify as jsonStringify } from "json5";
 
 const YamlEditor: React.FC = () => {
-  const [value, setValue] = useState<string>("//Yaml Code ::");
+  const [value, setValue] = useState<string>(""); // State for YAML content as string
   const [jsonObjects, setJsonObjects] = useState<any[]>([]); // State for storing parsed JSON objects
   const fileInputRef = useRef<HTMLInputElement>(null);
 
