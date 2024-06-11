@@ -181,7 +181,7 @@ const YamlEditor: React.FC = () => {
                   <h3>Document {index + 1}</h3>
                   {renderInputs(obj, index)}
                   <button
-                    className="btn bg-red-400"
+                    className="btn w-full bg-red-400"
                     onClick={() => handleDeleteResource(index)}
                   >
                     Delete Resource
