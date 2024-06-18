@@ -1,5 +1,6 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import axios from "axios";
 import CodeMirror from "@uiw/react-codemirror";
 import { yaml } from "@codemirror/lang-yaml";
 import { oneDark } from "@codemirror/theme-one-dark";
@@ -9,7 +10,19 @@ import { parse as jsonParse, stringify as jsonStringify } from "json5";
 const YamlEditor: React.FC = () => {
   const [value, setValue] = useState<string>("");
   const [jsonObjects, setJsonObjects] = useState<any[]>([]);
+  const [schemas, setSchemas] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const fetchSchemas = async () => {
+      const response = await axios.get(
+        "https://raw.githubusercontent.com/kubernetes/kubernetes/master/api/openapi-spec/swagger.json"
+      );
+      const schemas = response.data.definitions;
+      setSchemas(schemas);
+    };
+    fetchSchemas();
+  }, []);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -66,7 +79,7 @@ const YamlEditor: React.FC = () => {
     current[keys[keys.length - 1]] = value;
   };
 
-  const handleInputChange = (index: number, path: string, newValue: string) => {
+  const handleInputChange = (index: number, path: string, newValue: any) => {
     setJsonObjects((prev) => {
       const updated = [...prev];
       updateNestedObject(updated[index], path, newValue);
@@ -78,8 +91,21 @@ const YamlEditor: React.FC = () => {
     });
   };
 
+  const handleAddNestedField = (index: number, path: string) => {
+    setJsonObjects((prev) => {
+      const updated = [...prev];
+      const nestedPath = `${path}.newField`; // Example: Adjust this based on your actual nested path
+      updateNestedObject(updated[index], nestedPath, "");
+      const updatedYaml = updated
+        .map((item) => yamlStringify(item))
+        .join("---\n");
+      setValue(updatedYaml);
+      return updated;
+    });
+  };
+
   const handleAddResource = () => {
-    setJsonObjects((prev) => [...prev, {}]);
+    setJsonObjects((prev) => [...prev, { spec: {} }]);
   };
 
   const handleDeleteResource = (index: number) => {
@@ -95,8 +121,11 @@ const YamlEditor: React.FC = () => {
   };
 
   const renderInputs = (obj: any, index: number, path = "") => {
+    if (!schemas) return null; // Wait until schemas are loaded
+
     return Object.entries(obj).map(([key, value]) => {
       const currentPath = path ? `${path}.${key}` : key;
+      const schema = schemas[key];
 
       return (
         <div key={currentPath} className="mb-2">
@@ -107,7 +136,15 @@ const YamlEditor: React.FC = () => {
             {key}
           </label>
           {typeof value === "object" && value !== null ? (
-            renderInputs(value, index, currentPath)
+            <div className="ml-4">
+              {renderInputs(value, index, currentPath)}
+              <button
+                className="btn bg-blue-400 mt-2"
+                onClick={() => handleAddNestedField(index, currentPath)}
+              >
+                Add Nested Field
+              </button>
+            </div>
           ) : (
             <input
               id={currentPath}
