@@ -1,6 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import axios from "axios";
+import React, { useRef, useState } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { yaml } from "@codemirror/lang-yaml";
 import { oneDark } from "@codemirror/theme-one-dark";
@@ -10,20 +9,9 @@ import { parse as jsonParse, stringify as jsonStringify } from "json5";
 const YamlEditor: React.FC = () => {
   const [value, setValue] = useState<string>("");
   const [jsonObjects, setJsonObjects] = useState<any[]>([]);
-  const [schemas, setSchemas] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const fetchSchemas = async () => {
-      const response = await axios.get(
-        "https://raw.githubusercontent.com/kubernetes/kubernetes/master/api/openapi-spec/swagger.json"
-      );
-      const schemas = response.data.definitions;
-      setSchemas(schemas);
-    };
-    fetchSchemas();
-  }, []);
-
+  // Handle file change and parse YAML content
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -43,6 +31,7 @@ const YamlEditor: React.FC = () => {
     }
   };
 
+  // Convert YAML to JSON
   const handleYamlToJson = () => {
     try {
       const parsedDocuments = parseAllDocuments(value);
@@ -55,6 +44,7 @@ const YamlEditor: React.FC = () => {
     }
   };
 
+  // Convert JSON to YAML
   const handleJsonToYaml = () => {
     try {
       const obj = jsonParse(value);
@@ -66,19 +56,22 @@ const YamlEditor: React.FC = () => {
     }
   };
 
+  // Trigger file input click
   const handleButtonClick = () => {
     fileInputRef.current?.click();
   };
 
-  const updateNestedObject = (obj: any, path: string, value: any) => {
+  // Update nested object with new value
+  const updateNestedObject = (obj: any, path: string, newValue: any) => {
     const keys = path.split(".");
     let current = obj;
     for (let i = 0; i < keys.length - 1; i++) {
       current = current[keys[i]] = current[keys[i]] || {};
     }
-    current[keys[keys.length - 1]] = value;
+    current[keys[keys.length - 1]] = newValue;
   };
 
+  // Handle input change and update JSON object
   const handleInputChange = (index: number, path: string, newValue: any) => {
     setJsonObjects((prev) => {
       const updated = [...prev];
@@ -91,6 +84,7 @@ const YamlEditor: React.FC = () => {
     });
   };
 
+  // Add nested field in JSON object
   const handleAddNestedField = (index: number, path: string) => {
     setJsonObjects((prev) => {
       const updated = [...prev];
@@ -104,10 +98,12 @@ const YamlEditor: React.FC = () => {
     });
   };
 
+  // Add new resource to JSON object
   const handleAddResource = () => {
     setJsonObjects((prev) => [...prev, { spec: {} }]);
   };
 
+  // Delete a resource from JSON object
   const handleDeleteResource = (index: number) => {
     setJsonObjects((prev) => {
       const updated = [...prev];
@@ -120,20 +116,18 @@ const YamlEditor: React.FC = () => {
     });
   };
 
+  // Render inputs for nested objects
   const renderInputs = (obj: any, index: number, path = "") => {
-    if (!schemas) return null; // Wait until schemas are loaded
-
     return Object.entries(obj).map(([key, value]) => {
       const currentPath = path ? `${path}.${key}` : key;
-      const schema = schemas[key];
 
       return (
         <div key={currentPath} className="mb-2">
           <label
             htmlFor={currentPath}
-            className="block text-sm font-medium text-white"
+            className="block text-sm font-medium text-white mt-2"
           >
-            {key}
+            {key}:
           </label>
           {typeof value === "object" && value !== null ? (
             <div className="ml-4">
@@ -142,7 +136,7 @@ const YamlEditor: React.FC = () => {
                 className="btn bg-blue-400 mt-2"
                 onClick={() => handleAddNestedField(index, currentPath)}
               >
-                Add Nested Field
+                Add Field
               </button>
             </div>
           ) : (
@@ -161,6 +155,7 @@ const YamlEditor: React.FC = () => {
     });
   };
 
+  // Handle CodeMirror editor change and update state
   const handleEditorChange = (newValue: string) => {
     setValue(newValue);
     try {
@@ -174,7 +169,7 @@ const YamlEditor: React.FC = () => {
 
   return (
     <section>
-      <div className="container mt-24 grid grid-cols-1 items-center justify-center gap-5 ">
+      <div className="container mt-24 grid grid-cols-1  gap-5 mb-10 ">
         <div className="flex items-center justify-center gap-5">
           <div className="relative w-[130px] h-[50px] ">
             <input
@@ -207,38 +202,45 @@ const YamlEditor: React.FC = () => {
             JSON to YAML
           </button>
         </div>
-        <div className="flex items-center justify-center gap-5">
-          <div>
-            <label htmlFor="jsonInput" className="text__para">
-              Edit JSON
-            </label>
-            <div id="jsonInputs" className="flex flex-col gap-4">
-              {jsonObjects.map((obj, index) => (
-                <div key={index}>
-                  <h3>Document {index + 1}</h3>
-                  {renderInputs(obj, index)}
-                  <button
-                    className="btn w-full bg-red-400"
-                    onClick={() => handleDeleteResource(index)}
-                  >
-                    Delete Resource
-                  </button>
-                </div>
-              ))}
-              <button className="btn" onClick={handleAddResource}>
-                Add Resource
-              </button>
+      </div>
+
+      <div className="flex ">
+        <div className="bg-background p-6 w-[700px] flex flex-col gap-6 h-[600px] overflow-auto">
+          <div className="flex items-center justify-center gap-5">
+            <div>
+              <label htmlFor="jsonInput" className="text__para">
+                Edit JSON
+              </label>
+              <div id="jsonInputs" className="flex flex-col gap-4">
+                {jsonObjects.map((obj, index) => (
+                  <div key={index}>
+                    <h3>Document {index + 1}</h3>
+                    {renderInputs(obj, index)}
+                    <button
+                      className="btn w-full bg-red-400"
+                      onClick={() => handleDeleteResource(index)}
+                    >
+                      Delete Resource
+                    </button>
+                  </div>
+                ))}
+                <button className="btn" onClick={handleAddResource}>
+                  Add Resource
+                </button>
+              </div>
             </div>
           </div>
+        </div>
+        <div className="flex-1">
           <div className="flex items-center justify-center ">
             <CodeMirror
               className=""
               value={value}
-              height="1200px"
-              width="400px"
+              height="600px"
+              width="700px"
               theme={oneDark}
               extensions={[yaml()]}
-              onChange={(value) => handleEditorChange(value)}
+              onChange={handleEditorChange}
             />
           </div>
         </div>
