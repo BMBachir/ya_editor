@@ -5,9 +5,11 @@ import { yaml } from "@codemirror/lang-yaml";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { parseAllDocuments, stringify as yamlStringify } from "yaml";
 import { parse as jsonParse, stringify as jsonStringify } from "json5";
+import { MdDeleteForever } from "react-icons/md";
+import { IoIosAdd } from "react-icons/io";
 
 const YamlEditor: React.FC = () => {
-  const [value, setValue] = useState<string>("");
+  const [yamlValue, setYamlValue] = useState<string>("");
   const [jsonObjects, setJsonObjects] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -18,7 +20,7 @@ const YamlEditor: React.FC = () => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target?.result as string;
-        setValue(text);
+        setYamlValue(text);
         try {
           const parsedDocuments = parseAllDocuments(text);
           const parsedObjects = parsedDocuments.map((doc) => doc.toJSON());
@@ -34,10 +36,10 @@ const YamlEditor: React.FC = () => {
   // Convert YAML to JSON
   const handleYamlToJson = () => {
     try {
-      const parsedDocuments = parseAllDocuments(value);
+      const parsedDocuments = parseAllDocuments(yamlValue);
       const parsedObjects = parsedDocuments.map((doc) => doc.toJSON());
       const json = jsonStringify(parsedObjects, null, 2);
-      setValue(json);
+      setYamlValue(json);
       setJsonObjects(parsedObjects);
     } catch (error) {
       console.error("Error converting YAML to JSON:", error);
@@ -47,13 +49,21 @@ const YamlEditor: React.FC = () => {
   // Convert JSON to YAML
   const handleJsonToYaml = () => {
     try {
-      const obj = jsonParse(value);
-      const yaml = obj.map((item: any) => yamlStringify(item)).join("---\n");
-      setValue(yaml);
+      const obj = jsonParse(yamlValue);
+      const yamlString = obj
+        .map((item: any) => yamlStringify(item))
+        .join("---\n");
+      setYamlValue(yamlString);
       setJsonObjects(obj);
     } catch (error) {
       console.error("Error converting JSON to YAML:", error);
     }
+  };
+
+  // Clear YAML content
+  const handleClearYaml = () => {
+    setYamlValue("");
+    setJsonObjects([]);
   };
 
   // Trigger file input click
@@ -79,9 +89,29 @@ const YamlEditor: React.FC = () => {
       const updatedYaml = updated
         .map((item) => yamlStringify(item))
         .join("---\n");
-      setValue(updatedYaml);
+      setYamlValue(updatedYaml);
       return updated;
     });
+  };
+
+  // Function to handle key change
+  const handleKeyChange = (index: number, oldKey: string, newKey: string) => {
+    setJsonObjects((prev) => {
+      const updated = [...prev];
+      updateNestedKey(updated[index], oldKey, newKey);
+      const updatedYaml = updated
+        .map((item) => yamlStringify(item))
+        .join("---\n");
+      setYamlValue(updatedYaml);
+      return updated;
+    });
+  };
+
+  // Function to update nested key in the object
+  const updateNestedKey = (obj: any, oldKey: string, newKey: string) => {
+    const value = obj[oldKey];
+    delete obj[oldKey];
+    obj[newKey] = value;
   };
 
   // Add nested field in JSON object
@@ -93,7 +123,7 @@ const YamlEditor: React.FC = () => {
       const updatedYaml = updated
         .map((item) => yamlStringify(item))
         .join("---\n");
-      setValue(updatedYaml);
+      setYamlValue(updatedYaml);
       return updated;
     });
   };
@@ -111,45 +141,72 @@ const YamlEditor: React.FC = () => {
       const updatedYaml = updated
         .map((item) => yamlStringify(item))
         .join("---\n");
-      setValue(updatedYaml);
+      setYamlValue(updatedYaml);
       return updated;
     });
   };
 
   // Render inputs for nested objects
   const renderInputs = (obj: any, index: number, path = "") => {
-    return Object.entries(obj).map(([key, value]) => {
+    return Object.keys(obj).map((key) => {
+      const value = obj[key];
+
+      if (typeof key !== "string") {
+        return null;
+      }
+
       const currentPath = path ? `${path}.${key}` : key;
 
       return (
-        <div key={currentPath} className="mb-2">
-          <label
-            htmlFor={currentPath}
-            className="block text-sm font-medium text-white mt-2"
-          >
-            {key}:
-          </label>
-          {typeof value === "object" && value !== null ? (
-            <div className="ml-4">
-              {renderInputs(value, index, currentPath)}
-              <button
-                className="btn bg-blue-400 mt-2"
-                onClick={() => handleAddNestedField(index, currentPath)}
-              >
-                Add Field
-              </button>
-            </div>
-          ) : (
+        <div key={currentPath} className="mb-2 flex-1">
+          <div className="">
+            <label
+              htmlFor={`${currentPath}-key`}
+              className="block text-sm font-medium text-white mt-2"
+            >
+              Key:
+            </label>
             <input
-              id={currentPath}
+              id={`${currentPath}-key`}
               type="text"
-              value={value as string | number | readonly string[] | undefined}
-              onChange={(e) =>
-                handleInputChange(index, currentPath, e.target.value)
-              }
+              value={key}
+              onChange={(e) => handleKeyChange(index, key, e.target.value)}
               className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
             />
-          )}
+          </div>
+          <div className="">
+            <label
+              htmlFor={`${currentPath}-value`}
+              className="block text-sm font-medium text-white mt-2"
+            >
+              Value:
+            </label>
+            {typeof value === "object" && value !== null ? (
+              <div className="ml-4">
+                {renderInputs(value, index, currentPath)}
+                <button
+                  className="btn bg-blue-400 mt-2"
+                  onClick={() => handleAddNestedField(index, currentPath)}
+                >
+                  <IoIosAdd />
+                </button>
+              </div>
+            ) : (
+              <div className="">
+                <input
+                  id={`${currentPath}-value`}
+                  type="text"
+                  value={
+                    value as string | number | readonly string[] | undefined
+                  }
+                  onChange={(e) =>
+                    handleInputChange(index, currentPath, e.target.value)
+                  }
+                  className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
+                />
+              </div>
+            )}
+          </div>
         </div>
       );
     });
@@ -157,7 +214,7 @@ const YamlEditor: React.FC = () => {
 
   // Handle CodeMirror editor change and update state
   const handleEditorChange = (newValue: string) => {
-    setValue(newValue);
+    setYamlValue(newValue);
     try {
       const parsedDocuments = parseAllDocuments(newValue);
       const parsedObjects = parsedDocuments.map((doc) => doc.toJSON());
@@ -208,9 +265,15 @@ const YamlEditor: React.FC = () => {
         <div className="bg-background p-6 w-[700px] flex flex-col gap-6 h-[600px] overflow-auto">
           <div className="flex items-center justify-center gap-5">
             <div>
-              <label htmlFor="jsonInput" className="text__para">
-                Edit JSON
-              </label>
+              <div className="flex justify-between items-center mb-4 gap-10">
+                <h2 className="text__para">Edit JSON</h2>
+                <button
+                  className="btn bg-red-400 px-4 py-2 text-white font-semibold rounded-md shadow-sm hover:bg-red-500"
+                  onClick={handleClearYaml}
+                >
+                  <MdDeleteForever />
+                </button>
+              </div>
               <div id="jsonInputs" className="flex flex-col gap-4">
                 {jsonObjects.map((obj, index) => (
                   <div key={index}>
@@ -235,7 +298,7 @@ const YamlEditor: React.FC = () => {
           <div className="flex items-center justify-center ">
             <CodeMirror
               className=""
-              value={value}
+              value={yamlValue}
               height="600px"
               width="700px"
               theme={oneDark}
