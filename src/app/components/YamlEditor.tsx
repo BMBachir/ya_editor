@@ -296,7 +296,7 @@ const YamlEditor: React.FC = () => {
                     </button>
                   </div>
                 </div>
-                <div className="flex-1 pl-5 bg-gray-800">
+                <div className="flex-1 ml-7 bg-gray-800">
                   <div className="flex items-center justify-center">
                     <CodeMirror
                       value={yamlValue}
