@@ -260,10 +260,10 @@ const YamlEditor: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col md:flex-row flex-1">
-                <div className="bg-gray-800 p-6 w-full md:w-1/3 flex flex-col gap-6 h-[600px] overflow-auto">
+              <div className="flex flex-col md:flex-row flex-1 ">
+                <div className="bg-gray-800 p-6 w-full md:w-1/3 flex flex-col rounded-lg gap-6 h-[720px] overflow-auto">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold">Edit JSON</h2>
+                    <h2 className="text-xl font-semibold">Edit from inputs</h2>
                     <button
                       className="btn bg-red-500 hover:bg-red-600 px-4 py-2 text-white font-semibold rounded-md shadow-sm"
                       onClick={handleClearYaml}
@@ -300,7 +300,7 @@ const YamlEditor: React.FC = () => {
                   <div className="flex items-center justify-center">
                     <CodeMirror
                       value={yamlValue}
-                      height="580px"
+                      height="720px"
                       theme={oneDark}
                       extensions={[yaml()]}
                       onChange={handleEditorChange}
