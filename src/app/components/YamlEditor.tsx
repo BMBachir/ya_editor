@@ -13,7 +13,7 @@ const YamlEditor: React.FC = () => {
   const [yamlValue, setYamlValue] = useState<string>(":::::YAML:::::");
   const [jsonObjects, setJsonObjects] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const [expandedSections, setExpandedSections] = useState({});
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -224,7 +224,7 @@ const YamlEditor: React.FC = () => {
     <div className="flex bg-gray-900">
       <NavBar />
       <div className="flex flex-col md:flex-row flex-1 ml-64">
-        <div className="flex-1 bg-gray-800 overflow-auto">
+        <div className="flex-1 bg-gray-800 overflow-auto custom-scrollbar">
           <div className="flex flex-col min-h-screen bg-gray-900 text-white">
             <div className="container">
               <div className="mt-24 flex flex-col items-center gap-5 mb-10">

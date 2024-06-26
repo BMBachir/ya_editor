@@ -50,4 +50,18 @@ body {
   .input {
     @apply border border-gray-300 rounded-md px-4 py-2 text-base text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent;
   }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  /* Scrollbar thumb */
+  ::-webkit-scrollbar-thumb {
+    background-color: #4a5568;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: #2d3748;
+  }
 }
