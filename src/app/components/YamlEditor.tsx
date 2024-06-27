@@ -13,7 +13,12 @@ const YamlEditor: React.FC = () => {
   const [yamlValue, setYamlValue] = useState<string>(":::::YAML:::::");
   const [jsonObjects, setJsonObjects] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [expandedSections, setExpandedSections] = useState({});
+  const [isNavVisible, setIsNavVisible] = useState(false);
+
+  const toggleNavVisibility = () => {
+    setIsNavVisible(!isNavVisible);
+  };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -76,30 +81,6 @@ const YamlEditor: React.FC = () => {
     current[keys[keys.length - 1]] = newValue;
   };
 
-  const handleInputChange = (index: number, path: string, newValue: any) => {
-    setJsonObjects((prev) => {
-      const updated = [...prev];
-      updateNestedObject(updated[index], path, newValue);
-      const updatedYaml = updated
-        .map((item) => yamlStringify(item))
-        .join("---\n");
-      setYamlValue(updatedYaml);
-      return updated;
-    });
-  };
-
-  const handleKeyChange = (index: number, oldPath: string, newPath: string) => {
-    setJsonObjects((prev) => {
-      const updated = [...prev];
-      updateNestedKey(updated[index], oldPath, newPath);
-      const updatedYaml = updated
-        .map((item) => yamlStringify(item))
-        .join("---\n");
-      setYamlValue(updatedYaml);
-      return updated;
-    });
-  };
-
   const updateNestedKey = (obj: any, oldPath: string, newKey: string) => {
     const keys = oldPath.split(".");
     const lastKey = keys.pop();
@@ -142,38 +123,62 @@ const YamlEditor: React.FC = () => {
     });
   };
 
+  const handleInputChange = (index: number, path: string, newValue: any) => {
+    setJsonObjects((prev) => {
+      const updated = [...prev];
+      updateNestedObject(updated[index], path, newValue);
+      const updatedYaml = updated
+        .map((item) => yamlStringify(item))
+        .join("---\n");
+      setYamlValue(updatedYaml);
+      return updated;
+    });
+  };
+
+  const handleKeyChange = (index: number, oldPath: string, newPath: string) => {
+    setJsonObjects((prev) => {
+      const updated = [...prev];
+      updateNestedKey(updated[index], oldPath, newPath);
+      const updatedYaml = updated
+        .map((item) => yamlStringify(item))
+        .join("---\n");
+      setYamlValue(updatedYaml);
+      return updated;
+    });
+  };
+
   const renderInputs = (obj: any, index: number, path = "") => {
     return Object.keys(obj).map((key) => {
       const value = obj[key];
       const currentPath = path ? `${path}.${key}` : key;
 
+      // Use a unique key for each input based on its path
+      const inputKey = `${index}-${currentPath}`;
+
       return (
-        <div key={currentPath} className="mb-2 flex-1 ">
-          <div className="">
+        <div key={inputKey} className="mb-2 flex-1">
+          <div>
             <label
-              htmlFor={`${currentPath}-key`}
+              htmlFor={`${inputKey}-key`}
               className="block text-sm font-medium text-white mt-2"
             >
               Key:
             </label>
-            <input
-              id={`${currentPath}-key`}
-              type="text"
-              value={key}
-              onChange={(e) => {
-                const newKey = e.target.value;
-                handleKeyChange(
-                  index,
-                  currentPath,
-                  newKey ? `${path}.${newKey}` : newKey
-                );
-              }}
-              className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
-            />
+            <div>
+              <input
+                id={`${inputKey}-key`}
+                type="text"
+                value={key}
+                onChange={(e) =>
+                  handleKeyChange(index, currentPath, e.target.value)
+                }
+                className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
+              />
+            </div>
           </div>
           <div>
             <label
-              htmlFor={`${currentPath}-value`}
+              htmlFor={`${inputKey}-value`}
               className="block text-sm font-medium text-white mt-2"
             >
               Value:
@@ -191,11 +196,9 @@ const YamlEditor: React.FC = () => {
             ) : (
               <div>
                 <input
-                  id={`${currentPath}-value`}
+                  id={`${inputKey}-value`}
                   type="text"
-                  value={
-                    value as string | number | readonly string[] | undefined
-                  }
+                  value={value}
                   onChange={(e) =>
                     handleInputChange(index, currentPath, e.target.value)
                   }
@@ -261,6 +264,7 @@ const YamlEditor: React.FC = () => {
               </div>
 
               <div className="flex flex-col md:flex-row flex-1 ">
+                {/****************************** */}
                 <div className="bg-gray-800 p-6 w-full md:w-1/3 flex flex-col rounded-lg gap-6 h-[720px] overflow-auto">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold">Edit from inputs</h2>
@@ -274,18 +278,26 @@ const YamlEditor: React.FC = () => {
                   <div id="jsonInputs" className="flex flex-col gap-4">
                     {jsonObjects.map((obj, index) => (
                       <div key={index} className="bg-gray-700 p-4 rounded-lg">
-                        <h3 className="text-lg font-medium mb-2">
-                          Document {index + 1}
-                        </h3>
-                        <div className="rounded-md">
-                          {renderInputs(obj, index)}
-                        </div>
-                        <button
-                          className="btn bg-red-400 hover:bg-red-500 w-full mt-2"
-                          onClick={() => handleDeleteResource(index)}
+                        <div
+                          className="flex items-center justify-between cursor-pointer"
+                          onClick={toggleNavVisibility}
                         >
-                          Delete Resource
-                        </button>
+                          <h3 className="text-lg font-medium mb-2">
+                            Document {index + 1}
+                          </h3>
+                          <span>{isNavVisible ? "-" : "+"}</span>
+                        </div>
+                        {isNavVisible && (
+                          <div className="rounded-md">
+                            {renderInputs(obj, index)}
+                            <button
+                              className="btn bg-red-400 hover:bg-red-500 w-full mt-2"
+                              onClick={() => handleDeleteResource(index)}
+                            >
+                              Delete Resource
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
                     <button
@@ -296,6 +308,7 @@ const YamlEditor: React.FC = () => {
                     </button>
                   </div>
                 </div>
+                {/****************************** */}
                 <div className="flex-1 ml-7 bg-gray-800">
                   <div className="flex items-center justify-center">
                     <CodeMirror
