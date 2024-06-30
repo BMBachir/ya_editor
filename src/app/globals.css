@@ -64,4 +64,13 @@ body {
   ::-webkit-scrollbar-track {
     background-color: #2d3748;
   }
+
+  /* Example of custom theme styles */
+  .CodeMirror.cm-s-custom-yaml-theme .cm-keyword {
+    color: orange; /* Customize color for keys */
+  }
+
+  .CodeMirror.cm-s-custom-yaml-theme .cm-string {
+    color: white; /* Default color for values */
+  }
 }

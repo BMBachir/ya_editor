@@ -14,7 +14,6 @@ const YamlEditor: React.FC = () => {
   const [jsonObjects, setJsonObjects] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isNavVisible, setIsNavVisible] = useState(false);
-
   const toggleNavVisibility = () => {
     setIsNavVisible(!isNavVisible);
   };
@@ -36,6 +35,9 @@ const YamlEditor: React.FC = () => {
       };
       reader.readAsText(file);
     }
+
+    // Reset file input value to allow the same file to be uploaded again
+    event.target.value = ""; //
   };
 
   const handleYamlToJson = () => {
@@ -84,11 +86,14 @@ const YamlEditor: React.FC = () => {
   const updateNestedKey = (obj: any, oldPath: string, newKey: string) => {
     const keys = oldPath.split(".");
     const lastKey = keys.pop();
+
     if (!lastKey) return;
 
-    const parent = keys.reduce((acc, key) => (acc[key] = acc[key] || {}), obj);
+    const parent = keys.reduce((acc, key) => {
+      return (acc[key] = acc[key] || {});
+    }, obj);
 
-    if (parent && parent.hasOwnProperty(lastKey)) {
+    if (parent && lastKey in parent) {
       parent[newKey] = parent[lastKey];
       delete parent[lastKey];
     }
@@ -135,13 +140,37 @@ const YamlEditor: React.FC = () => {
     });
   };
 
-  const handleKeyChange = (index: number, oldPath: string, newPath: string) => {
+  const handleKeyChange = (index: number, oldPath: string, newKey: string) => {
     setJsonObjects((prev) => {
+      // Create a deep copy of the array to avoid mutating state directly
       const updated = [...prev];
-      updateNestedKey(updated[index], oldPath, newPath);
+
+      // Retrieve the object at the specified index
+      const updatedObj = { ...updated[index] };
+
+      // Function to update nested keys in an object
+      const updateNestedKey = (obj: any, path: string, newKey: string) => {
+        const keys = path.split(".");
+        let current = obj;
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]] = current[keys[i]] || {};
+        }
+        current[newKey] = current[keys[keys.length - 1]];
+        delete current[keys[keys.length - 1]];
+      };
+
+      // Update the nested key in the copied object
+      updateNestedKey(updatedObj, oldPath, newKey);
+
+      // Update the object at the specified index in the copied array
+      updated[index] = updatedObj;
+
+      // Convert the updated array to YAML string for display
       const updatedYaml = updated
         .map((item) => yamlStringify(item))
         .join("---\n");
+
+      // Update the state with the updated array and YAML string
       setYamlValue(updatedYaml);
       return updated;
     });
@@ -170,7 +199,11 @@ const YamlEditor: React.FC = () => {
                 type="text"
                 value={key}
                 onChange={(e) =>
-                  handleKeyChange(index, currentPath, e.target.value)
+                  handleKeyChange(
+                    index,
+                    path ? `${path}.${key}` : key,
+                    e.target.value
+                  )
                 }
                 className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
               />
@@ -240,13 +273,12 @@ const YamlEditor: React.FC = () => {
                       className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
                       onChange={handleFileChange}
                     />
-                    <label
-                      htmlFor="customFile"
-                      className="absolute top-0 left-0 w-full h-full flex items-center justify-center px-6 py-2 text-[15px] leading-6 overflow-hidden bg-gray-200 text-gray-900 hover:text-gray-200 hover:bg-gray-800 font-semibold rounded-lg truncate cursor-pointer"
-                      onClick={handleButtonClick}
+                    <button
+                      className="absolute top-0 left-0 w-full h-full flex items-center justify-center px-6 py-2 text-[15px] leading-6 bg-gray-200 text-gray-900 hover:text-gray-200 hover:bg-gray-800 font-semibold rounded-lg cursor-pointer"
+                      onClick={() => fileInputRef.current?.click()}
                     >
                       Upload File
-                    </label>
+                    </button>
                   </div>
                   <button
                     className="btn bg-gray-500 hover:bg-gray-600 inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
