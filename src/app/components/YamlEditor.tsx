@@ -27,7 +27,12 @@ const YamlEditor: React.FC = () => {
         setYamlValue(text);
         try {
           const parsedDocuments = parseAllDocuments(text);
-          const parsedObjects = parsedDocuments.map((doc) => doc.toJSON());
+          const parsedObjects = parsedDocuments.map((doc) => {
+            const obj = doc.toJSON();
+            // Assuming your YAML structure has a 'kind' property, set it here
+            obj.kind = obj.kind || "Unknown";
+            return obj;
+          });
           setJsonObjects(parsedObjects);
         } catch (error) {
           console.error("Error parsing YAML:", error);
@@ -37,7 +42,7 @@ const YamlEditor: React.FC = () => {
     }
 
     // Reset file input value to allow the same file to be uploaded again
-    event.target.value = ""; //
+    event.target.value = "";
   };
 
   const handleYamlToJson = () => {
@@ -315,7 +320,8 @@ const YamlEditor: React.FC = () => {
                           onClick={toggleNavVisibility}
                         >
                           <h3 className="text-lg font-medium mb-2">
-                            Document {index + 1}
+                            Kind: {obj.kind || "Unknown"}{" "}
+                            {/* Display the kind of document */}
                           </h3>
                           <span>{isNavVisible ? "-" : "+"}</span>
                         </div>
@@ -332,12 +338,6 @@ const YamlEditor: React.FC = () => {
                         )}
                       </div>
                     ))}
-                    <button
-                      className="btn bg-blue-500 hover:bg-blue-600 w-full mt-4"
-                      onClick={handleAddResource}
-                    >
-                      Add Resource
-                    </button>
                   </div>
                 </div>
                 {/****************************** */}
