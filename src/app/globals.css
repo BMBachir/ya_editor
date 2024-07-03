@@ -65,12 +65,23 @@ body {
     background-color: #2d3748;
   }
 
-  /* Example of custom theme styles */
-  .CodeMirror.cm-s-custom-yaml-theme .cm-keyword {
-    color: orange; /* Customize color for keys */
+  /* Example CSS adjustments for oneDark theme */
+  .cm-s-one-dark.CodeMirror {
+    background: #282c34; /* Background color */
+    color: #abb2bf; /* Text color */
   }
 
-  .CodeMirror.cm-s-custom-yaml-theme .cm-string {
-    color: white; /* Default color for values */
+  .cm-s-one-dark .cm-comment {
+    color: #5c6370; /* Comment color */
   }
+
+  .cm-s-one-dark .cm-keyword {
+    color: #c678dd; /* Keyword color */
+  }
+
+  .cm-s-one-dark .cm-string {
+    color: #98c379; /* String color */
+  }
+
+  /* Adjust other syntax highlighting colors as needed */
 }

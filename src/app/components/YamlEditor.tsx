@@ -9,12 +9,33 @@ import { MdDeleteForever } from "react-icons/md";
 import { IoIosAdd } from "react-icons/io";
 import NavBar from "./NavBar";
 
+// Define your Kubernetes schema or template here
+const kubernetesSchema = {
+  kind: "Service",
+  metadata: {
+    name: "example-service",
+    namespace: "default",
+  },
+  spec: {
+    selector: {
+      app: "example",
+    },
+    ports: [
+      {
+        port: 80,
+        targetPort: 8080,
+      },
+    ],
+  },
+};
+
 const YamlEditor: React.FC = () => {
   const [yamlValue, setYamlValue] = useState<string>(":::::YAML:::::");
   const [jsonObjects, setJsonObjects] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedKind, setSelectedKind] = useState<string | null>(null);
 
+  // Function to handle file upload and parse YAML
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -36,10 +57,10 @@ const YamlEditor: React.FC = () => {
       };
       reader.readAsText(file);
     }
-
     event.target.value = "";
   };
 
+  // Function to convert YAML to JSON
   const handleYamlToJson = () => {
     try {
       const parsedDocuments = parseAllDocuments(yamlValue);
@@ -52,6 +73,7 @@ const YamlEditor: React.FC = () => {
     }
   };
 
+  // Function to convert JSON to YAML
   const handleJsonToYaml = () => {
     try {
       const obj = jsonParse(yamlValue);
@@ -65,40 +87,13 @@ const YamlEditor: React.FC = () => {
     }
   };
 
+  // Function to clear YAML editor
   const handleClearYaml = () => {
     setYamlValue("");
     setJsonObjects([]);
   };
 
-  const handleButtonClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const updateNestedObject = (obj: any, path: string, newValue: any) => {
-    const keys = path.split(".");
-    let current = obj;
-    for (let i = 0; i < keys.length - 1; i++) {
-      current = current[keys[i]] = current[keys[i]] || {};
-    }
-    current[keys[keys.length - 1]] = newValue;
-  };
-
-  const updateNestedKey = (obj: any, oldPath: string, newKey: string) => {
-    const keys = oldPath.split(".");
-    const lastKey = keys.pop();
-
-    if (!lastKey) return;
-
-    const parent = keys.reduce((acc, key) => {
-      return (acc[key] = acc[key] || {});
-    }, obj);
-
-    if (parent && lastKey in parent) {
-      parent[newKey] = parent[lastKey];
-      delete parent[lastKey];
-    }
-  };
-
+  // Function to handle adding a new nested field
   const handleAddNestedField = (index: number, path: string) => {
     setJsonObjects((prev) => {
       const updated = [...prev];
@@ -112,34 +107,17 @@ const YamlEditor: React.FC = () => {
     });
   };
 
-  const handleAddResource = () => {
-    setJsonObjects((prev) => [...prev, { spec: {} }]);
+  // Function to update nested object
+  const updateNestedObject = (obj: any, path: string, newValue: any) => {
+    const keys = path.split(".");
+    let current = obj;
+    for (let i = 0; i < keys.length - 1; i++) {
+      current = current[keys[i]] = current[keys[i]] || {};
+    }
+    current[keys[keys.length - 1]] = newValue;
   };
 
-  const handleDeleteResource = (index: number) => {
-    setJsonObjects((prev) => {
-      const updated = [...prev];
-      updated.splice(index, 1);
-      const updatedYaml = updated
-        .map((item) => yamlStringify(item))
-        .join("---\n");
-      setYamlValue(updatedYaml);
-      return updated;
-    });
-  };
-
-  const handleInputChange = (index: number, path: string, newValue: any) => {
-    setJsonObjects((prev) => {
-      const updated = [...prev];
-      updateNestedObject(updated[index], path, newValue);
-      const updatedYaml = updated
-        .map((item) => yamlStringify(item))
-        .join("---\n");
-      setYamlValue(updatedYaml);
-      return updated;
-    });
-  };
-
+  // Function to handle key change in nested objects
   const handleKeyChange = (index: number, oldPath: string, newKey: string) => {
     setJsonObjects((prev) => {
       const updated = [...prev];
@@ -163,6 +141,51 @@ const YamlEditor: React.FC = () => {
     });
   };
 
+  // Function to handle editor change in CodeMirror
+  const handleEditorChange = (newValue: string) => {
+    setYamlValue(newValue);
+    try {
+      const parsedDocuments = parseAllDocuments(newValue);
+      const parsedObjects = parsedDocuments.map((doc) => doc.toJSON());
+      setJsonObjects(parsedObjects);
+    } catch (error) {
+      console.error("Error parsing YAML:", error);
+    }
+  };
+
+  // Function to toggle visibility of kind in YAML editor
+  const toggleKindVisibility = (kind: string) => {
+    setSelectedKind(selectedKind === kind ? null : kind);
+  };
+
+  // Function to handle adding a new Kubernetes resource
+  const handleAddResource = () => {
+    setJsonObjects((prev) => [...prev, { ...kubernetesSchema }]);
+    try {
+      const updatedYaml = [
+        ...jsonObjects.map((obj) => yamlStringify(obj)),
+        yamlStringify({ ...kubernetesSchema }),
+      ].join("---\n");
+      setYamlValue(updatedYaml);
+    } catch (error) {
+      console.error("Error updating YAML value:", error);
+    }
+  };
+
+  // Function to handle deleting a resource
+  const handleDeleteResource = (index: number) => {
+    setJsonObjects((prev) => {
+      const updated = [...prev];
+      updated.splice(index, 1);
+      const updatedYaml = updated
+        .map((item) => yamlStringify(item))
+        .join("---\n");
+      setYamlValue(updatedYaml);
+      return updated;
+    });
+  };
+
+  // Function to render input fields recursively
   const renderInputs = (obj: any, index: number, path = "") => {
     return Object.keys(obj).map((key) => {
       const value = obj[key];
@@ -229,19 +252,17 @@ const YamlEditor: React.FC = () => {
     });
   };
 
-  const handleEditorChange = (newValue: string) => {
-    setYamlValue(newValue);
-    try {
-      const parsedDocuments = parseAllDocuments(newValue);
-      const parsedObjects = parsedDocuments.map((doc) => doc.toJSON());
-      setJsonObjects(parsedObjects);
-    } catch (error) {
-      console.error("Error parsing YAML:", error);
-    }
-  };
-
-  const toggleKindVisibility = (kind: string) => {
-    setSelectedKind(selectedKind === kind ? null : kind);
+  // Function to handle input change in nested fields
+  const handleInputChange = (index: number, path: string, newValue: any) => {
+    setJsonObjects((prev) => {
+      const updated = [...prev];
+      updateNestedObject(updated[index], path, newValue);
+      const updatedYaml = updated
+        .map((item) => yamlStringify(item))
+        .join("---\n");
+      setYamlValue(updatedYaml);
+      return updated;
+    });
   };
 
   return (
@@ -263,7 +284,7 @@ const YamlEditor: React.FC = () => {
                     />
                     <button
                       className="absolute top-0 left-0 w-full h-full flex items-center justify-center px-6 py-2 text-[15px] leading-6 bg-gray-200 text-gray-900 hover:text-gray-200 hover:bg-gray-800 font-semibold rounded-lg cursor-pointer"
-                      onClick={handleButtonClick}
+                      onClick={() => fileInputRef.current?.click()}
                     >
                       Upload File
                     </button>
