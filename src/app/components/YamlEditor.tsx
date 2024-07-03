@@ -13,10 +13,7 @@ const YamlEditor: React.FC = () => {
   const [yamlValue, setYamlValue] = useState<string>(":::::YAML:::::");
   const [jsonObjects, setJsonObjects] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isNavVisible, setIsNavVisible] = useState(false);
-  const toggleNavVisibility = () => {
-    setIsNavVisible(!isNavVisible);
-  };
+  const [selectedKind, setSelectedKind] = useState<string | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -29,7 +26,6 @@ const YamlEditor: React.FC = () => {
           const parsedDocuments = parseAllDocuments(text);
           const parsedObjects = parsedDocuments.map((doc) => {
             const obj = doc.toJSON();
-            // Assuming your YAML structure has a 'kind' property, set it here
             obj.kind = obj.kind || "Unknown";
             return obj;
           });
@@ -41,7 +37,6 @@ const YamlEditor: React.FC = () => {
       reader.readAsText(file);
     }
 
-    // Reset file input value to allow the same file to be uploaded again
     event.target.value = "";
   };
 
@@ -147,13 +142,8 @@ const YamlEditor: React.FC = () => {
 
   const handleKeyChange = (index: number, oldPath: string, newKey: string) => {
     setJsonObjects((prev) => {
-      // Create a deep copy of the array to avoid mutating state directly
       const updated = [...prev];
-
-      // Retrieve the object at the specified index
       const updatedObj = { ...updated[index] };
-
-      // Function to update nested keys in an object
       const updateNestedKey = (obj: any, path: string, newKey: string) => {
         const keys = path.split(".");
         let current = obj;
@@ -163,19 +153,11 @@ const YamlEditor: React.FC = () => {
         current[newKey] = current[keys[keys.length - 1]];
         delete current[keys[keys.length - 1]];
       };
-
-      // Update the nested key in the copied object
       updateNestedKey(updatedObj, oldPath, newKey);
-
-      // Update the object at the specified index in the copied array
       updated[index] = updatedObj;
-
-      // Convert the updated array to YAML string for display
       const updatedYaml = updated
         .map((item) => yamlStringify(item))
         .join("---\n");
-
-      // Update the state with the updated array and YAML string
       setYamlValue(updatedYaml);
       return updated;
     });
@@ -185,10 +167,7 @@ const YamlEditor: React.FC = () => {
     return Object.keys(obj).map((key) => {
       const value = obj[key];
       const currentPath = path ? `${path}.${key}` : key;
-
-      // Use a unique key for each input based on its path
       const inputKey = `${index}-${currentPath}`;
-
       return (
         <div key={inputKey} className="mb-2 flex-1">
           <div>
@@ -261,6 +240,10 @@ const YamlEditor: React.FC = () => {
     }
   };
 
+  const toggleKindVisibility = (kind: string) => {
+    setSelectedKind(selectedKind === kind ? null : kind);
+  };
+
   return (
     <div className="flex bg-gray-900">
       <NavBar />
@@ -280,7 +263,7 @@ const YamlEditor: React.FC = () => {
                     />
                     <button
                       className="absolute top-0 left-0 w-full h-full flex items-center justify-center px-6 py-2 text-[15px] leading-6 bg-gray-200 text-gray-900 hover:text-gray-200 hover:bg-gray-800 font-semibold rounded-lg cursor-pointer"
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={handleButtonClick}
                     >
                       Upload File
                     </button>
@@ -317,15 +300,14 @@ const YamlEditor: React.FC = () => {
                       <div key={index} className="bg-gray-700 p-4 rounded-lg">
                         <div
                           className="flex items-center justify-between cursor-pointer"
-                          onClick={toggleNavVisibility}
+                          onClick={() => toggleKindVisibility(obj.kind)}
                         >
                           <h3 className="text-lg font-medium mb-2">
-                            Kind: {obj.kind || "Unknown"}{" "}
-                            {/* Display the kind of document */}
+                            Kind: {obj.kind || "Unknown"}
                           </h3>
-                          <span>{isNavVisible ? "-" : "+"}</span>
+                          <span>{selectedKind === obj.kind ? "-" : "+"}</span>
                         </div>
-                        {isNavVisible && (
+                        {selectedKind === obj.kind && (
                           <div className="rounded-md">
                             {renderInputs(obj, index)}
                             <button
@@ -339,6 +321,12 @@ const YamlEditor: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                  <button
+                    className="btn bg-green-400 hover:bg-green-500 w-full mt-2"
+                    onClick={handleAddResource}
+                  >
+                    Add Resource
+                  </button>
                 </div>
                 {/****************************** */}
                 <div className="flex-1 ml-7 bg-gray-800">
