@@ -5,8 +5,9 @@ import { yaml } from "@codemirror/lang-yaml";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { parseAllDocuments, stringify as yamlStringify } from "yaml";
 import { parse as jsonParse, stringify as jsonStringify } from "json5";
-import { MdDeleteForever } from "react-icons/md";
+import { MdDeleteOutline } from "react-icons/md";
 import { IoIosAdd } from "react-icons/io";
+import { IoAdd } from "react-icons/io5";
 import NavBar from "./NavBar";
 
 // Define your Kubernetes schema or template here
@@ -33,7 +34,14 @@ const YamlEditor: React.FC = () => {
   const [yamlValue, setYamlValue] = useState<string>(":::::YAML:::::");
   const [jsonObjects, setJsonObjects] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedKind, setSelectedKind] = useState<string | null>(null);
+  const [expandedResourceIndex, setExpandedResourceIndex] = useState<
+    number | null
+  >(null);
+  const [showPopup, setShowPopup] = useState(false); // State to manage popup visibility
+
+  const togglePopup = () => {
+    setShowPopup(!showPopup);
+  };
 
   // Function to handle file upload and parse YAML
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,8 +162,10 @@ const YamlEditor: React.FC = () => {
   };
 
   // Function to toggle visibility of kind in YAML editor
-  const toggleKindVisibility = (kind: string) => {
-    setSelectedKind(selectedKind === kind ? null : kind);
+  const toggleKindVisibility = (index: number) => {
+    setExpandedResourceIndex((prevIndex) =>
+      prevIndex === index ? null : index
+    );
   };
 
   // Function to handle adding a new Kubernetes resource
@@ -309,26 +319,37 @@ const YamlEditor: React.FC = () => {
                 <div className="bg-gray-800 p-6 w-full md:w-1/3 flex flex-col rounded-lg gap-6 h-[720px] overflow-auto">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold">Edit from inputs</h2>
-                    <button
-                      className="btn bg-red-500 hover:bg-red-600 px-4 py-2 text-white font-semibold rounded-md shadow-sm"
-                      onClick={handleClearYaml}
-                    >
-                      <MdDeleteForever />
-                    </button>
+                    <div className="flex gap-5">
+                      <></>
+                      <button
+                        className=" text-red-500 hover:text-red-600 font-semibold rounded-md shadow-sm"
+                        onClick={handleClearYaml}
+                      >
+                        <MdDeleteOutline className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={togglePopup} // Toggle popup on click
+                        className=" text-green-400 hover:text-green-400 font-semibold rounded-md shadow-sm"
+                      >
+                        <IoAdd className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
                   <div id="jsonInputs" className="flex flex-col gap-4">
                     {jsonObjects.map((obj, index) => (
                       <div key={index} className="bg-gray-700 p-4 rounded-lg">
                         <div
                           className="flex items-center justify-between cursor-pointer"
-                          onClick={() => toggleKindVisibility(obj.kind)}
+                          onClick={() => toggleKindVisibility(index)}
                         >
                           <h3 className="text-lg font-medium mb-2">
                             Kind: {obj.kind || "Unknown"}
                           </h3>
-                          <span>{selectedKind === obj.kind ? "-" : "+"}</span>
+                          <span>
+                            {expandedResourceIndex === index ? "-" : "+"}
+                          </span>
                         </div>
-                        {selectedKind === obj.kind && (
+                        {expandedResourceIndex === index && (
                           <div className="rounded-md">
                             {renderInputs(obj, index)}
                             <button
@@ -342,12 +363,6 @@ const YamlEditor: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                  <button
-                    className="btn bg-green-400 hover:bg-green-500 w-full mt-2"
-                    onClick={handleAddResource}
-                  >
-                    Add Resource
-                  </button>
                 </div>
                 {/****************************** */}
                 <div className="flex-1 ml-7 bg-gray-800">
@@ -367,6 +382,24 @@ const YamlEditor: React.FC = () => {
           </div>
         </div>
       </div>
+      {/**************** Popup ****************/}
+      {showPopup && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+          <div className="bg-gray-900 p-4 rounded-lg shadow-lg">
+            <h2 className="text-lg font-semibold mb-2">Add</h2>
+            <p onClick={handleAddResource} className="cursor-pointer">
+              Services
+            </p>
+            <button
+              className="btn bg-red-500 hover:bg-red-600 text-white font-semibold mt-4"
+              onClick={togglePopup}
+            >
+              Close Popup
+            </button>
+          </div>
+        </div>
+      )}
+      {/**************** End Popup ****************/}
     </div>
   );
 };
