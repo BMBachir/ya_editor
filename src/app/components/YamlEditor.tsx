@@ -8,7 +8,9 @@ import { parse as jsonParse, stringify as jsonStringify } from "json5";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosAdd } from "react-icons/io";
 import { IoAdd } from "react-icons/io5";
+import { FaFileUpload } from "react-icons/fa";
 import NavBar from "./NavBar";
+import Stepper from "./Stepper";
 import {
   Dropdown,
   DropdownTrigger,
@@ -353,38 +355,8 @@ const YamlEditor: React.FC = () => {
         <div className="flex-1 bg-gray-800 overflow-auto custom-scrollbar">
           <div className="flex flex-col min-h-screen bg-gray-900 text-white">
             <div className="container">
-              <div className="mt-24 flex flex-col items-center gap-5 mb-10">
-                <div className="flex items-center justify-center gap-5">
-                  <div className="relative w-[130px] h-[50px]">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      accept=".yaml,.yml"
-                      className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
-                      onChange={handleFileChange}
-                    />
-                    <button
-                      className="absolute top-0 left-0 w-full h-full flex items-center justify-center px-6 py-2 text-[15px] leading-6 bg-gray-200 text-gray-900 hover:text-gray-200 hover:bg-gray-800 font-semibold rounded-lg cursor-pointer"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      Upload File
-                    </button>
-                  </div>
-                  <button
-                    className="btn bg-gray-500 hover:bg-gray-600 inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                    onClick={handleYamlToJson}
-                  >
-                    YAML to JSON
-                  </button>
-                  <button
-                    className="btn bg-gray-500 hover:bg-gray-600 inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                    onClick={handleJsonToYaml}
-                  >
-                    JSON to YAML
-                  </button>
-                </div>
-              </div>
-
+              <div className="mt-24 flex flex-col items-center gap-5 mb-10"></div>
+              <Stepper />
               <div className="flex flex-col md:flex-row flex-1 ">
                 {/****************************** */}
                 <div className="bg-gray-800 p-6 w-full md:w-1/3 flex flex-col rounded-lg gap-6 h-[720px] overflow-auto">
@@ -478,15 +450,46 @@ const YamlEditor: React.FC = () => {
                 </div>
                 {/****************************** */}
                 <div className="flex-1 ml-7 bg-gray-800">
-                  <div className="flex items-center justify-center">
+                  <div className="flex flex-col items-center justify-center">
                     <CodeMirror
                       value={yamlValue}
-                      height="720px"
+                      height="680px"
                       theme={oneDark}
                       extensions={[yaml()]}
                       onChange={handleEditorChange}
                       className="w-full"
                     />
+                    <div className="">
+                      <div className="flex items-center justify-center gap-5">
+                        <div className="relative w-[130px] h-[50px]">
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            accept=".yaml,.yml"
+                            className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                            onChange={handleFileChange}
+                          />
+                          .
+                          <FaFileUpload
+                            className="absolute top-0 left-0 w-[15px] h-full flex items-center justify-center text-[15px] text-gray-100 hover:text-hoverColor cursor-pointer"
+                            onClick={() => fileInputRef.current?.click()}
+                          />
+                        </div>
+
+                        <button
+                          className="btn bg-gray-500 hover:bg-gray-600 inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                          onClick={handleYamlToJson}
+                        >
+                          YAML to JSON
+                        </button>
+                        <button
+                          className="btn bg-gray-500 hover:bg-gray-600 inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                          onClick={handleJsonToYaml}
+                        >
+                          JSON to YAML
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

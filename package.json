@@ -14,7 +14,11 @@
     "@codemirror/lang-yaml": "^6.1.1",
     "@codemirror/state": "^6.4.1",
     "@codemirror/view": "^6.27.0",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
     "@lezer/highlight": "^1.2.0",
+    "@mui/material": "^5.15.21",
+    "@mui/styled-engine-sc": "^6.0.0-alpha.18",
     "@nextui-org/dropdown": "^2.1.26",
     "@nextui-org/navbar": "^2.0.33",
     "@nextui-org/popover": "^2.1.24",
@@ -30,7 +34,8 @@
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
-    "react-icons": "^5.2.1"
+    "react-icons": "^5.2.1",
+    "styled-components": "^6.1.11"
   },
   "devDependencies": {
     "@types/node": "^20",
