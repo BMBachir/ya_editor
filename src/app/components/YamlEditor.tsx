@@ -9,24 +9,94 @@ import { MdDeleteOutline } from "react-icons/md";
 import { IoIosAdd } from "react-icons/io";
 import { IoAdd } from "react-icons/io5";
 import NavBar from "./NavBar";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@nextui-org/dropdown";
 
-// Define your Kubernetes schema or template here
-const kubernetesSchema = {
-  kind: "Service",
+// Define types for Kubernetes templates
+type KubernetesTemplate = {
+  kind: string;
   metadata: {
-    name: "example-service",
-    namespace: "default",
-  },
-  spec: {
-    selector: {
-      app: "example",
+    name: string;
+    namespace: string;
+  };
+  spec?: any;
+  data?: any;
+};
+
+type KubernetesTemplates = {
+  Service: KubernetesTemplate;
+  Deployment: KubernetesTemplate;
+  ConfigMap: KubernetesTemplate;
+};
+
+const kubernetesTemplates: KubernetesTemplates = {
+  Service: {
+    kind: "Service",
+    metadata: {
+      name: "example-service",
+      namespace: "default",
     },
-    ports: [
-      {
-        port: 80,
-        targetPort: 8080,
+    spec: {
+      selector: {
+        app: "example",
       },
-    ],
+      ports: [
+        {
+          port: 80,
+          targetPort: 8080,
+        },
+      ],
+    },
+  },
+  Deployment: {
+    kind: "Deployment",
+    metadata: {
+      name: "example-deployment",
+      namespace: "default",
+    },
+    spec: {
+      replicas: 1,
+      selector: {
+        matchLabels: {
+          app: "example",
+        },
+      },
+      template: {
+        metadata: {
+          labels: {
+            app: "example",
+          },
+        },
+        spec: {
+          containers: [
+            {
+              name: "example-container",
+              image: "nginx:latest",
+              ports: [
+                {
+                  containerPort: 80,
+                },
+              ],
+            },
+          ],
+        },
+      },
+    },
+  },
+  ConfigMap: {
+    kind: "ConfigMap",
+    metadata: {
+      name: "example-configmap",
+      namespace: "default",
+    },
+    data: {
+      "example.property.1": "value-1",
+      "example.property.2": "value-2",
+    },
   },
 };
 
@@ -169,13 +239,14 @@ const YamlEditor: React.FC = () => {
   };
 
   // Function to handle adding a new Kubernetes resource
-  const handleAddResource = () => {
-    setJsonObjects((prev) => [...prev, { ...kubernetesSchema }]);
+  const handleAddResource = (resourceType: keyof KubernetesTemplates) => {
+    const newResource = kubernetesTemplates[resourceType];
+    setJsonObjects((prev) => [...prev, { ...newResource }]);
     try {
       const updatedYaml = [
         ...jsonObjects.map((obj) => yamlStringify(obj)),
-        yamlStringify({ ...kubernetesSchema }),
-      ].join("---\n");
+        yamlStringify({ ...newResource }),
+      ].join("---s\n");
       setYamlValue(updatedYaml);
     } catch (error) {
       console.error("Error updating YAML value:", error);
@@ -327,12 +398,53 @@ const YamlEditor: React.FC = () => {
                       >
                         <MdDeleteOutline className="h-5 w-5" />
                       </button>
-                      <button
-                        onClick={togglePopup} // Toggle popup on click
-                        className=" text-green-400 hover:text-green-400 font-semibold rounded-md shadow-sm"
-                      >
-                        <IoAdd className="h-5 w-5" />
-                      </button>
+
+                      <div className="mt-1">
+                        <Dropdown backdrop="blur">
+                          <DropdownTrigger>
+                            <button className=" text-green-400 hover:text-green-400 font-semibold rounded-md shadow-sm">
+                              <IoAdd className="h-5 w-5" />
+                            </button>
+                          </DropdownTrigger>
+                          <DropdownMenu
+                            variant="faded"
+                            aria-label="Static Actions"
+                            className=" text-gray-900"
+                          >
+                            <DropdownItem
+                              key="new"
+                              onClick={() => {
+                                handleAddResource("Deployment");
+                              }}
+                            >
+                              Service
+                            </DropdownItem>
+                            <DropdownItem
+                              key="copy"
+                              onClick={() => {
+                                handleAddResource("Deployment");
+                                togglePopup();
+                              }}
+                            >
+                              Deployment
+                            </DropdownItem>
+                            <DropdownItem
+                              key="edit"
+                              onClick={() => {
+                                handleAddResource("ConfigMap");
+                              }}
+                            >
+                              ConfigMap
+                            </DropdownItem>
+                            <DropdownItem
+                              className="text-danger"
+                              color="danger"
+                            >
+                              Close
+                            </DropdownItem>
+                          </DropdownMenu>
+                        </Dropdown>
+                      </div>
                     </div>
                   </div>
                   <div id="jsonInputs" className="flex flex-col gap-4">
@@ -382,24 +494,6 @@ const YamlEditor: React.FC = () => {
           </div>
         </div>
       </div>
-      {/**************** Popup ****************/}
-      {showPopup && (
-        <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
-          <div className="bg-gray-900 p-4 rounded-lg shadow-lg">
-            <h2 className="text-lg font-semibold mb-2">Add</h2>
-            <p onClick={handleAddResource} className="cursor-pointer">
-              Services
-            </p>
-            <button
-              className="btn bg-red-500 hover:bg-red-600 text-white font-semibold mt-4"
-              onClick={togglePopup}
-            >
-              Close Popup
-            </button>
-          </div>
-        </div>
-      )}
-      {/**************** End Popup ****************/}
     </div>
   );
 };
