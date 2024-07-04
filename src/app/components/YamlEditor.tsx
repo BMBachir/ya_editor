@@ -110,6 +110,12 @@ const YamlEditor: React.FC = () => {
   const [expandedResourceIndex, setExpandedResourceIndex] = useState<
     number | null
   >(null);
+  const [isYamlToJson, setIsYamlToJson] = useState(true);
+
+  const toggleConvert = () => {
+    setIsYamlToJson(!isYamlToJson);
+  };
+
   const [showPopup, setShowPopup] = useState(false); // State to manage popup visibility
 
   const togglePopup = () => {
@@ -471,7 +477,7 @@ const YamlEditor: React.FC = () => {
                             onChange={handleFileChange}
                           />
                           <div
-                            className="flex items-center justify-center absolute top-0 left-0 h-full text-[15px] text-gray-100 hover:text-hoverColor cursor-pointer"
+                            className="flex items-center justify-center absolute top-0 left-0 h-full text-[15px] text-gray-100 hover:text-hoverColor cursor-pointer  transition-colors"
                             onClick={() => fileInputRef.current?.click()}
                           >
                             <div className="flex items-center justify-center gap-3">
@@ -480,19 +486,34 @@ const YamlEditor: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                        <GiCardExchange />
-                        <button
-                          className="btn bg-gray-500 hover:bg-gray-600 inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                          onClick={handleYamlToJson}
-                        >
-                          YAML to JSON
-                        </button>
-                        <button
-                          className="btn bg-gray-500 hover:bg-gray-600 inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                          onClick={handleJsonToYaml}
-                        >
-                          JSON to YAML
-                        </button>
+
+                        <>
+                          {isYamlToJson ? (
+                            <button
+                              className="inline-flex gap-3 items-center justify-center px-6 py-3 text-gray-100 hover:text-hoverColor cursor-pointer transition-colors "
+                              onClick={() => {
+                                handleYamlToJson();
+                                toggleConvert();
+                              }}
+                            >
+                              <GiCardExchange className="h-5 w-5" />
+                              YAML to JSON
+                            </button>
+                          ) : null}
+
+                          {!isYamlToJson ? (
+                            <button
+                              className="inline-flex gap-3 items-center justify-center px-6 py-3 text-gray-100 hover:text-hoverColor cursor-pointer transition-colors "
+                              onClick={() => {
+                                handleJsonToYaml();
+                                toggleConvert();
+                              }}
+                            >
+                              <GiCardExchange className="h-5 w-5" />
+                              JSON to YAML
+                            </button>
+                          ) : null}
+                        </>
                       </div>
                     </div>
                   </div>
