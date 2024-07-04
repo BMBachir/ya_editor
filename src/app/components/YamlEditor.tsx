@@ -362,8 +362,9 @@ const YamlEditor: React.FC = () => {
         <div className="flex-1 bg-gray-800 overflow-auto custom-scrollbar">
           <div className="flex flex-col min-h-screen bg-gray-900 text-white">
             <div className="container">
-              <div className="mt-24 flex flex-col items-center gap-5 mb-10"></div>
-              <Stepper />
+              <div className="mt-24 flex flex-col items-center gap-5 mb-10">
+                <Stepper />
+              </div>
               <div className="flex flex-col md:flex-row flex-1 ">
                 {/****************************** */}
                 <div className="bg-gray-800 p-6 w-full md:w-1/3 flex flex-col rounded-lg gap-6 h-[720px] overflow-auto">

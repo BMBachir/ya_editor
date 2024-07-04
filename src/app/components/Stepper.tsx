@@ -22,7 +22,7 @@ const darkTheme = createTheme({
       paper: "#121212",
     },
     text: {
-      primary: "#48cae4",
+      primary: "#00ADEF",
       secondary: "#FCF8F3",
     },
   },
@@ -36,12 +36,12 @@ const QontoConnector = styled(StepConnector)(({ theme }) => ({
   },
   [`&.${stepConnectorClasses.active}`]: {
     [`& .${stepConnectorClasses.line}`]: {
-      borderColor: "#48cae4",
+      borderColor: "#00ADEF",
     },
   },
   [`&.${stepConnectorClasses.completed}`]: {
     [`& .${stepConnectorClasses.line}`]: {
-      borderColor: "#48cae4",
+      borderColor: "#00ADEF",
     },
   },
   [`& .${stepConnectorClasses.line}`]: {
@@ -54,15 +54,15 @@ const QontoConnector = styled(StepConnector)(({ theme }) => ({
 
 const QontoStepIconRoot = styled("div")<{ ownerState: { active?: boolean } }>(
   ({ theme, ownerState }) => ({
-    color: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#48cae4",
+    color: theme.palette.mode === "dark" ? theme.palette.grey[800] : "#00ADEF",
     display: "flex",
     height: 22,
     alignItems: "center",
     ...(ownerState.active && {
-      color: "#48cae4",
+      color: "#00ADEF",
     }),
     "& .QontoStepIcon-completedIcon": {
-      color: "#48cae4",
+      color: "#00ADEF",
       zIndex: 1,
       fontSize: 18,
     },
@@ -109,7 +109,7 @@ const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
     height: 3,
     border: 0,
     backgroundColor:
-      theme.palette.mode === "dark" ? theme.palette.grey[800] : "#48cae4",
+      theme.palette.mode === "dark" ? theme.palette.grey[800] : "#00ADEF",
     borderRadius: 1,
   },
 }));
