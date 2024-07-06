@@ -25,6 +25,8 @@ type KubernetesTemplate = {
   metadata: {
     name: string;
     namespace: string;
+    labels?: Record<string, string>;
+    annotations?: Record<string, string>;
   };
   spec?: any;
   data?: any;
@@ -51,6 +53,7 @@ const kubernetesTemplates: KubernetesTemplates = {
         {
           port: 80,
           targetPort: 8080,
+          protocol: "TCP",
         },
       ],
     },
@@ -73,6 +76,7 @@ const kubernetesTemplates: KubernetesTemplates = {
           labels: {
             app: "example",
           },
+          annotations: {},
         },
         spec: {
           containers: [
@@ -84,6 +88,9 @@ const kubernetesTemplates: KubernetesTemplates = {
                   containerPort: 80,
                 },
               ],
+              resources: {},
+              env: [],
+              volumeMounts: [],
             },
           ],
         },
@@ -104,7 +111,7 @@ const kubernetesTemplates: KubernetesTemplates = {
 };
 
 const YamlEditor: React.FC = () => {
-  const [yamlValue, setYamlValue] = useState<string>(":::::YAML:::::");
+  const [yamlValue, setYamlValue] = useState<string>("");
   const [jsonObjects, setJsonObjects] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [expandedResourceIndex, setExpandedResourceIndex] = useState<
@@ -116,13 +123,12 @@ const YamlEditor: React.FC = () => {
     setIsYamlToJson(!isYamlToJson);
   };
 
-  const [showPopup, setShowPopup] = useState(false); // State to manage popup visibility
+  const [showPopup, setShowPopup] = useState(false);
 
   const togglePopup = () => {
     setShowPopup(!showPopup);
   };
 
-  // Function to handle file upload and parse YAML
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -147,7 +153,6 @@ const YamlEditor: React.FC = () => {
     event.target.value = "";
   };
 
-  // Function to convert YAML to JSON
   const handleYamlToJson = () => {
     try {
       const parsedDocuments = parseAllDocuments(yamlValue);
@@ -160,7 +165,6 @@ const YamlEditor: React.FC = () => {
     }
   };
 
-  // Function to convert JSON to YAML
   const handleJsonToYaml = () => {
     try {
       const obj = jsonParse(yamlValue);
@@ -174,13 +178,11 @@ const YamlEditor: React.FC = () => {
     }
   };
 
-  // Function to clear YAML editor
   const handleClearYaml = () => {
     setYamlValue("");
     setJsonObjects([]);
   };
 
-  // Function to handle adding a new nested field
   const handleAddNestedField = (index: number, path: string) => {
     setJsonObjects((prev) => {
       const updated = [...prev];
@@ -194,7 +196,6 @@ const YamlEditor: React.FC = () => {
     });
   };
 
-  // Function to update nested object
   const updateNestedObject = (obj: any, path: string, newValue: any) => {
     const keys = path.split(".");
     let current = obj;
@@ -204,31 +205,65 @@ const YamlEditor: React.FC = () => {
     current[keys[keys.length - 1]] = newValue;
   };
 
-  // Function to handle key change in nested objects
   const handleKeyChange = (index: number, oldPath: string, newKey: string) => {
+    const editableMetadataKeys = [
+      "metadata.name",
+      "metadata.namespace",
+      "metadata.labels",
+      "metadata.annotations",
+    ];
+    const editableSpecKeys = [
+      "spec.replicas",
+      "spec.selector",
+      "spec.template.metadata",
+      "spec.template.metadata.labels",
+      "spec.template.metadata.annotations",
+      "spec.template.spec.containers",
+      "spec.template.spec.containers.name",
+      "spec.template.spec.containers.image",
+      "spec.template.spec.containers.ports",
+      "spec.template.spec.containers.resources",
+      "spec.template.spec.containers.env",
+      "spec.template.spec.containers.volumeMounts",
+      "spec.ports",
+      "spec.ports.port",
+      "spec.ports.targetPort",
+      "spec.ports.protocol",
+      "data",
+    ];
+
+    if (
+      !editableMetadataKeys.some((key) => oldPath.startsWith(key)) &&
+      !editableSpecKeys.some((key) => oldPath.startsWith(key))
+    ) {
+      return;
+    }
+
     setJsonObjects((prev) => {
       const updated = [...prev];
-      const updatedObj = { ...updated[index] };
-      const updateNestedKey = (obj: any, path: string, newKey: string) => {
-        const keys = path.split(".");
-        let current = obj;
-        for (let i = 0; i < keys.length - 1; i++) {
-          current = current[keys[i]] = current[keys[i]] || {};
-        }
-        current[newKey] = current[keys[keys.length - 1]];
-        delete current[keys[keys.length - 1]];
-      };
-      updateNestedKey(updatedObj, oldPath, newKey);
-      updated[index] = updatedObj;
+      const keys = oldPath.split(".");
+      let current: any = updated[index];
+
+      for (let i = 0; i < keys.length - 1; i++) {
+        current = current[keys[i]] = { ...current[keys[i]] };
+      }
+
+      const lastKey = keys[keys.length - 1];
+      if (current.hasOwnProperty(lastKey)) {
+        const value = current[lastKey];
+        delete current[lastKey];
+        current[newKey] = value;
+      }
+
       const updatedYaml = updated
         .map((item) => yamlStringify(item))
         .join("---\n");
       setYamlValue(updatedYaml);
+
       return updated;
     });
   };
 
-  // Function to handle editor change in CodeMirror
   const handleEditorChange = (newValue: string) => {
     setYamlValue(newValue);
     try {
@@ -240,14 +275,12 @@ const YamlEditor: React.FC = () => {
     }
   };
 
-  // Function to toggle visibility of kind in YAML editor
   const toggleKindVisibility = (index: number) => {
     setExpandedResourceIndex((prevIndex) =>
       prevIndex === index ? null : index
     );
   };
 
-  // Function to handle adding a new Kubernetes resource
   const handleAddResource = (resourceType: keyof KubernetesTemplates) => {
     const newResource = kubernetesTemplates[resourceType];
     setJsonObjects((prev) => [...prev, { ...newResource }]);
@@ -255,14 +288,13 @@ const YamlEditor: React.FC = () => {
       const updatedYaml = [
         ...jsonObjects.map((obj) => yamlStringify(obj)),
         yamlStringify({ ...newResource }),
-      ].join("---s\n");
+      ].join("---\n");
       setYamlValue(updatedYaml);
     } catch (error) {
       console.error("Error updating YAML value:", error);
     }
   };
 
-  // Function to handle deleting a resource
   const handleDeleteResource = (index: number) => {
     setJsonObjects((prev) => {
       const updated = [...prev];
@@ -275,7 +307,6 @@ const YamlEditor: React.FC = () => {
     });
   };
 
-  // Function to render input fields recursively
   const renderInputs = (obj: any, index: number, path = "") => {
     return Object.keys(obj).map((key) => {
       const value = obj[key];
@@ -342,7 +373,6 @@ const YamlEditor: React.FC = () => {
     });
   };
 
-  // Function to handle input change in nested fields
   const handleInputChange = (index: number, path: string, newValue: any) => {
     setJsonObjects((prev) => {
       const updated = [...prev];
@@ -366,7 +396,6 @@ const YamlEditor: React.FC = () => {
                 <Stepper />
               </div>
               <div className="flex flex-col md:flex-row flex-1 ">
-                {/****************************** */}
                 <div className="bg-gray-800 p-6 w-full md:w-1/3 flex flex-col rounded-lg gap-6 h-[720px] overflow-auto">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold">Edit from inputs</h2>
@@ -456,7 +485,6 @@ const YamlEditor: React.FC = () => {
                     ))}
                   </div>
                 </div>
-                {/****************************** */}
                 <div className="flex-1 ml-7 bg-gray-800">
                   <div className="flex flex-col items-center justify-center">
                     <CodeMirror
