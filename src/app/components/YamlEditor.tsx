@@ -54,6 +54,7 @@ const kubernetesTemplates: KubernetesTemplates = {
           port: 80,
           targetPort: 8080,
           protocol: "TCP",
+          nodePort: 30000,
         },
       ],
     },
@@ -88,7 +89,16 @@ const kubernetesTemplates: KubernetesTemplates = {
                   containerPort: 80,
                 },
               ],
-              resources: {},
+              resources: {
+                limits: {
+                  cpu: "500m",
+                  memory: "128Mi",
+                },
+                requests: {
+                  cpu: "250m",
+                  memory: "64Mi",
+                },
+              },
               env: [],
               volumeMounts: [],
             },
@@ -108,6 +118,23 @@ const kubernetesTemplates: KubernetesTemplates = {
       "example.property.2": "value-2",
     },
   },
+};
+
+const numberKeys = [
+  "spec.replicas",
+  "spec.ports.port",
+  "spec.ports.targetPort",
+  "spec.ports.nodePort",
+  "spec.template.spec.containers.0.ports.0.containerPort",
+  "spec.template.spec.containers.0.resources.limits.cpu",
+  "spec.template.spec.containers.0.resources.limits.memory",
+  "spec.template.spec.containers.0.resources.requests.cpu",
+  "spec.template.spec.containers.0.resources.requests.memory",
+];
+
+const isNumberKey = (path: string) => {
+  const normalizedPath = path.replace(/\[(\d+)\]/g, ".$1");
+  return numberKeys.includes(normalizedPath);
 };
 
 const YamlEditor: React.FC = () => {
@@ -228,6 +255,7 @@ const YamlEditor: React.FC = () => {
       "spec.ports",
       "spec.ports.port",
       "spec.ports.targetPort",
+      "spec.ports.nodePort",
       "spec.ports.protocol",
       "data",
     ];
@@ -312,6 +340,8 @@ const YamlEditor: React.FC = () => {
       const value = obj[key];
       const currentPath = path ? `${path}.${key}` : key;
       const inputKey = `${index}-${currentPath}`;
+      const isNumber = isNumberKey(currentPath);
+
       return (
         <div key={inputKey} className="mb-2 flex-1">
           <div>
@@ -327,11 +357,7 @@ const YamlEditor: React.FC = () => {
                 type="text"
                 value={key}
                 onChange={(e) =>
-                  handleKeyChange(
-                    index,
-                    path ? `${path}.${key}` : key,
-                    e.target.value
-                  )
+                  handleKeyChange(index, currentPath, e.target.value)
                 }
                 className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
               />
@@ -354,12 +380,28 @@ const YamlEditor: React.FC = () => {
                   <IoIosAdd />
                 </button>
               </div>
+            ) : isNumber ? (
+              <div>
+                <input
+                  id={`${inputKey}-value`}
+                  type="number"
+                  value={value === null ? "" : value} // Ensure value is not null
+                  onChange={(e) =>
+                    handleInputChange(
+                      index,
+                      currentPath,
+                      Number(e.target.value)
+                    )
+                  }
+                  className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
+                />
+              </div>
             ) : (
               <div>
                 <input
                   id={`${inputKey}-value`}
                   type="text"
-                  value={value}
+                  value={value === null ? "" : value} // Ensure value is not null
                   onChange={(e) =>
                     handleInputChange(index, currentPath, e.target.value)
                   }
