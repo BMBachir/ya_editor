@@ -18,7 +18,7 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "@nextui-org/dropdown";
-
+import { k8sDefinitions } from "./definitions";
 // Define types for Kubernetes templates
 type KubernetesTemplate = {
   kind: string;
