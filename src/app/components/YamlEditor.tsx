@@ -12,13 +12,26 @@ import { FaFileUpload } from "react-icons/fa";
 import { GiCardExchange } from "react-icons/gi";
 import NavBar from "./NavBar";
 import Stepper from "./Stepper";
+import { k8sDefinitions } from "./definitions";
 import {
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
 } from "@nextui-org/dropdown";
-import { k8sDefinitions } from "./definitions";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  useDisclosure,
+  RadioGroup,
+  Radio,
+  ModalProps,
+} from "@nextui-org/react";
+import { Select, SelectItem, Avatar, SelectedItems } from "@nextui-org/react";
 // Define types for Kubernetes templates
 type KubernetesTemplate = {
   kind: string;
@@ -33,9 +46,7 @@ type KubernetesTemplate = {
 };
 
 type KubernetesTemplates = {
-  Service: KubernetesTemplate;
-  Deployment: KubernetesTemplate;
-  ConfigMap: KubernetesTemplate;
+  [key: string]: KubernetesTemplate;
 };
 
 const kubernetesTemplates: KubernetesTemplates = {
@@ -309,7 +320,7 @@ const YamlEditor: React.FC = () => {
     );
   };
 
-  const handleAddResource = (resourceType: keyof KubernetesTemplates) => {
+  const handleAddResource = (resourceType: string) => {
     const newResource = kubernetesTemplates[resourceType];
     setJsonObjects((prev) => [...prev, { ...newResource }]);
     try {
@@ -427,6 +438,15 @@ const YamlEditor: React.FC = () => {
     });
   };
 
+  // Extract kind names from k8sDefinitions
+
+  const kinds = Object.keys(k8sDefinitions) as (keyof typeof k8sDefinitions)[];
+
+  // Now kinds will be an array of string literals of the keys in k8sDefinitions
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [scrollBehavior, setScrollBehavior] =
+    React.useState<ModalProps["scrollBehavior"]>("inside");
+
   return (
     <div className="flex bg-gray-900">
       <NavBar />
@@ -449,53 +469,30 @@ const YamlEditor: React.FC = () => {
                       >
                         <MdDeleteOutline className="h-5 w-5" />
                       </button>
-
-                      <div className="mt-1">
-                        <Dropdown backdrop="blur">
-                          <DropdownTrigger>
-                            <button className=" text-green-400 hover:text-green-400 font-semibold rounded-md shadow-sm">
-                              <IoAdd className="h-5 w-5" />
-                            </button>
-                          </DropdownTrigger>
-                          <DropdownMenu
-                            variant="faded"
-                            aria-label="Static Actions"
-                            className=" text-gray-900"
-                          >
-                            <DropdownItem
-                              key="new"
-                              onClick={() => {
-                                handleAddResource("Deployment");
-                              }}
-                            >
-                              Service
-                            </DropdownItem>
-                            <DropdownItem
-                              key="copy"
-                              onClick={() => {
-                                handleAddResource("Deployment");
-                                togglePopup();
-                              }}
-                            >
-                              Deployment
-                            </DropdownItem>
-                            <DropdownItem
-                              key="edit"
-                              onClick={() => {
-                                handleAddResource("ConfigMap");
-                              }}
-                            >
-                              ConfigMap
-                            </DropdownItem>
-                            <DropdownItem
-                              className="text-danger"
-                              color="danger"
-                            >
-                              Close
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </Dropdown>
-                      </div>
+                      {/************************************************************************** */}
+                      <Select
+                        className="max-w-xs h-12"
+                        placeholder="Select a kind"
+                        labelPlacement="outside"
+                        classNames={{
+                          base: "max-w-xs",
+                          trigger: "h-12",
+                        }}
+                      >
+                        {kinds.map((kind, index) => (
+                          <SelectItem key={index} value={kind}>
+                            <div className="flex items-center gap-2">
+                              <div className="flex flex-col">
+                                <span>{kind}</span>
+                                <span className="text-sm text-gray-500">
+                                  {kind}
+                                </span>
+                              </div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </Select>
+                      {/************************************************************************** */}
                     </div>
                   </div>
                   <div id="jsonInputs" className="flex flex-col gap-4">
