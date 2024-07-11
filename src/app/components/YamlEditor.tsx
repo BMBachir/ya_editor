@@ -443,9 +443,10 @@ const YamlEditor: React.FC = () => {
   const kinds = Object.keys(k8sDefinitions) as (keyof typeof k8sDefinitions)[];
 
   // Now kinds will be an array of string literals of the keys in k8sDefinitions
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [scrollBehavior, setScrollBehavior] =
-    React.useState<ModalProps["scrollBehavior"]>("inside");
+  const getLastWord = (str: string): string => {
+    const segments = str.split(".");
+    return segments[segments.length - 1];
+  };
 
   return (
     <div className="flex bg-gray-900">
@@ -483,9 +484,9 @@ const YamlEditor: React.FC = () => {
                           <SelectItem key={index} value={kind}>
                             <div className="flex items-center gap-2">
                               <div className="flex flex-col">
-                                <span>{kind}</span>
+                                <span> {getLastWord(kind)}</span>
                                 <span className="text-sm text-gray-500">
-                                  {kind}
+                                  {getLastWord(kind)}
                                 </span>
                               </div>
                             </div>
