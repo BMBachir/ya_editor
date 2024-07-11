@@ -463,39 +463,39 @@ const YamlEditor: React.FC = () => {
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold">Edit from inputs</h2>
                     <div className="flex gap-5">
-                      <></>
-                      <button
-                        className=" text-red-500 hover:text-red-600 font-semibold rounded-md shadow-sm"
-                        onClick={handleClearYaml}
-                      >
-                        <MdDeleteOutline className="h-5 w-5" />
-                      </button>
-                      {/************************************************************************** */}
-                      <Select
-                        className="max-w-xs h-12"
-                        placeholder="Select a kind"
-                        labelPlacement="outside"
-                        classNames={{
-                          base: "max-w-xs",
-                          trigger: "h-12",
-                        }}
-                      >
-                        {kinds.map((kind, index) => (
-                          <SelectItem key={index} value={kind}>
-                            <div className="flex items-center gap-2">
-                              <div className="flex flex-col">
-                                <span> {getLastWord(kind)}</span>
-                                <span className="text-sm text-gray-500">
-                                  {getLastWord(kind)}
-                                </span>
-                              </div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </Select>
-                      {/************************************************************************** */}
+                      <>
+                        <button
+                          className="text-red-500 hover:text-red-600 font-semibold rounded-md shadow-sm"
+                          onClick={handleClearYaml}
+                        >
+                          <MdDeleteOutline className="h-5 w-5" />
+                        </button>
+                        {/************************************************************************** */}
+
+                        {/************************************************************************** */}
+                      </>
                     </div>
                   </div>
+                  <Select
+                    classNames={{
+                      base: "max-w-xs",
+                      trigger: "h-12",
+                    }}
+                    placeholder="Add Resource By Kind"
+                  >
+                    {kinds.map((kind, index) => (
+                      <SelectItem key={index} value={kind}>
+                        <div className="flex items-center gap-2">
+                          <div className="flex flex-col">
+                            <span>{getLastWord(kind)}</span>
+                            <span className="text-sm text-gray-500">
+                              {getLastWord(kind)}
+                            </span>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </Select>
                   <div id="jsonInputs" className="flex flex-col gap-4">
                     {jsonObjects.map((obj, index) => (
                       <div key={index} className="bg-gray-700 p-4 rounded-lg">
