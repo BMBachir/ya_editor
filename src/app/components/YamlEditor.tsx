@@ -204,22 +204,54 @@ const YamlEditor: React.FC = () => {
       prevIndex === index ? null : index
     );
   };
-  {
-    /* 
+
+  const [placeholderText, setPlaceholderText] = useState(
+    "Add Resource By Kind"
+  );
+
   const handleAddResource = (resourceType: string) => {
-    const newResource = kubernetesTemplates[resourceType];
-    setJsonObjects((prev) => [...prev, { ...newResource }]);
+    // Set the selected kind
+    setPlaceholderText(resourceType);
+    // Ensure resourceType is a valid key of k8sDefinitions
+    if (!(resourceType in k8sDefinitions)) {
+      console.error(`Invalid resource type: ${resourceType}`);
+      return;
+    }
+
+    // Extract the resource object with type assertion
+    const resource =
+      k8sDefinitions[resourceType as keyof typeof k8sDefinitions];
+
+    // Check if the resource has properties
+    if (!("properties" in resource)) {
+      console.error(`No properties found for resource type: ${resourceType}`);
+      return;
+    }
+
+    // Access the properties
+    const properties = resource.properties;
+
+    // Create a new resource object with only the properties of the selected kind
+    const newResource = Object.keys(properties).reduce(
+      (acc: any, key: string) => {
+        acc[key] = ""; // Initialize values as empty strings or default values
+        return acc;
+      },
+      {}
+    );
+
+    setJsonObjects((prev) => [...prev, newResource]);
+
     try {
       const updatedYaml = [
         ...jsonObjects.map((obj) => yamlStringify(obj)),
-        yamlStringify({ ...newResource }),
+        yamlStringify(newResource),
       ].join("---\n");
       setYamlValue(updatedYaml);
     } catch (error) {
       console.error("Error updating YAML value:", error);
     }
-  };*/
-  }
+  };
 
   const handleDeleteResource = (index: number) => {
     setJsonObjects((prev) => {
@@ -357,60 +389,37 @@ const YamlEditor: React.FC = () => {
                         >
                           <MdDeleteOutline className="h-5 w-5" />
                         </button>
-                        {/************************************************************************** */}
-
-                        {/************************************************************************** */}
                       </>
                     </div>
                   </div>
-                  <Select
-                    classNames={{
-                      base: "max-w-xs",
-                      trigger: "h-12",
-                    }}
-                    placeholder="Add Resource By Kind"
-                  >
-                    {kinds.map((kind, index) => (
-                      <SelectItem key={index} value={kind}>
-                        <div className="flex items-center gap-2">
-                          <div className="flex flex-col">
-                            <span>{getLastWord(kind)}</span>
-                            <span className="text-sm text-gray-500">
-                              {getLastWord(kind)}
-                            </span>
-                          </div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </Select>
-
                   {/*********************************************** */}
-                  <div>
-                    <select>
-                      {kinds.map((kind, index) => {
-                        const properties =
-                          "properties" in k8sDefinitions[kind]
-                            ? k8sDefinitions[kind].properties
-                            : null;
-
-                        if (!properties) {
-                          return null;
-                        }
-
-                        // Iterate over each property in the 'properties' of each kind
-                        return Object.keys(properties).map(
-                          (propertyKey, propertyIndex) => (
-                            <option
-                              key={`${index}-${propertyIndex}`}
-                              value={propertyKey}
-                              className="text-black"
-                            >
-                              {propertyKey}
-                            </option>
-                          )
-                        );
-                      })}
-                    </select>
+                  <div className="flex items-center justify-center">
+                    <Select
+                      classNames={{
+                        base: "max-w-xs",
+                        trigger: "h-12",
+                      }}
+                      placeholder={placeholderText}
+                    >
+                      {kinds.map((kind, index) => (
+                        <SelectItem
+                          key={index}
+                          value={kind}
+                          onClick={() => {
+                            handleAddResource(kind);
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="flex flex-col">
+                              <span>{getLastWord(kind)}</span>
+                              <span className="text-sm text-gray-500">
+                                {getLastWord(kind)}
+                              </span>
+                            </div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </Select>
                   </div>
                   {/*********************************************** */}
                   <div id="jsonInputs" className="flex flex-col gap-4">
@@ -512,5 +521,4 @@ const YamlEditor: React.FC = () => {
     </div>
   );
 };
-
 export default YamlEditor;
