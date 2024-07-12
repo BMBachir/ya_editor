@@ -7,129 +7,14 @@ import { parseAllDocuments, stringify as yamlStringify } from "yaml";
 import { parse as jsonParse, stringify as jsonStringify } from "json5";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosAdd } from "react-icons/io";
-import { IoAdd } from "react-icons/io5";
 import { FaFileUpload } from "react-icons/fa";
 import { GiCardExchange } from "react-icons/gi";
 import NavBar from "./NavBar";
 import Stepper from "./Stepper";
 import { k8sDefinitions } from "./definitions";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-} from "@nextui-org/dropdown";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  useDisclosure,
-  RadioGroup,
-  Radio,
-  ModalProps,
-} from "@nextui-org/react";
-import { Select, SelectItem, Avatar, SelectedItems } from "@nextui-org/react";
+import { Select, SelectItem } from "@nextui-org/react";
+
 // Define types for Kubernetes templates
-type KubernetesTemplate = {
-  kind: string;
-  metadata: {
-    name: string;
-    namespace: string;
-    labels?: Record<string, string>;
-    annotations?: Record<string, string>;
-  };
-  spec?: any;
-  data?: any;
-};
-
-type KubernetesTemplates = {
-  [key: string]: KubernetesTemplate;
-};
-
-const kubernetesTemplates: KubernetesTemplates = {
-  Service: {
-    kind: "Service",
-    metadata: {
-      name: "example-service",
-      namespace: "default",
-    },
-    spec: {
-      selector: {
-        app: "example",
-      },
-      ports: [
-        {
-          port: 80,
-          targetPort: 8080,
-          protocol: "TCP",
-          nodePort: 30000,
-        },
-      ],
-    },
-  },
-  Deployment: {
-    kind: "Deployment",
-    metadata: {
-      name: "example-deployment",
-      namespace: "default",
-    },
-    spec: {
-      replicas: 1,
-      selector: {
-        matchLabels: {
-          app: "example",
-        },
-      },
-      template: {
-        metadata: {
-          labels: {
-            app: "example",
-          },
-          annotations: {},
-        },
-        spec: {
-          containers: [
-            {
-              name: "example-container",
-              image: "nginx:latest",
-              ports: [
-                {
-                  containerPort: 80,
-                },
-              ],
-              resources: {
-                limits: {
-                  cpu: "500m",
-                  memory: "128Mi",
-                },
-                requests: {
-                  cpu: "250m",
-                  memory: "64Mi",
-                },
-              },
-              env: [],
-              volumeMounts: [],
-            },
-          ],
-        },
-      },
-    },
-  },
-  ConfigMap: {
-    kind: "ConfigMap",
-    metadata: {
-      name: "example-configmap",
-      namespace: "default",
-    },
-    data: {
-      "example.property.1": "value-1",
-      "example.property.2": "value-2",
-    },
-  },
-};
 
 const numberKeys = [
   "spec.replicas",
@@ -319,7 +204,8 @@ const YamlEditor: React.FC = () => {
       prevIndex === index ? null : index
     );
   };
-
+  {
+    /* 
   const handleAddResource = (resourceType: string) => {
     const newResource = kubernetesTemplates[resourceType];
     setJsonObjects((prev) => [...prev, { ...newResource }]);
@@ -332,7 +218,8 @@ const YamlEditor: React.FC = () => {
     } catch (error) {
       console.error("Error updating YAML value:", error);
     }
-  };
+  };*/
+  }
 
   const handleDeleteResource = (index: number) => {
     setJsonObjects((prev) => {
@@ -496,6 +383,36 @@ const YamlEditor: React.FC = () => {
                       </SelectItem>
                     ))}
                   </Select>
+
+                  {/*********************************************** */}
+                  <div>
+                    <select>
+                      {kinds.map((kind, index) => {
+                        const properties =
+                          "properties" in k8sDefinitions[kind]
+                            ? k8sDefinitions[kind].properties
+                            : null;
+
+                        if (!properties) {
+                          return null;
+                        }
+
+                        // Iterate over each property in the 'properties' of each kind
+                        return Object.keys(properties).map(
+                          (propertyKey, propertyIndex) => (
+                            <option
+                              key={`${index}-${propertyIndex}`}
+                              value={propertyKey}
+                              className="text-black"
+                            >
+                              {propertyKey}
+                            </option>
+                          )
+                        );
+                      })}
+                    </select>
+                  </div>
+                  {/*********************************************** */}
                   <div id="jsonInputs" className="flex flex-col gap-4">
                     {jsonObjects.map((obj, index) => (
                       <div key={index} className="bg-gray-700 p-4 rounded-lg">
