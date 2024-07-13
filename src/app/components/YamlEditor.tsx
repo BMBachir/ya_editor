@@ -243,13 +243,21 @@ const YamlEditor: React.FC = () => {
 
     // Access the properties with type assertion
     const properties = resource.properties as {
-      [key: string]: { type: string };
+      [key: string]: { type?: string; items?: any };
     };
 
     // Create a new resource object with only the properties of the selected kind
     const newResource = Object.keys(properties).reduce((acc, key) => {
-      const propertyType = properties[key].type;
-      acc[key] = getDefaultForType(propertyType);
+      const property = properties[key];
+      if (property.items) {
+        // If items property exists, initialize it with an empty array
+        acc[key] = [];
+        // Add nested items key with null value for YAML
+        acc[key].push({ items: null });
+      } else {
+        const propertyType = property.type;
+        acc[key] = getDefaultForType(propertyType || "");
+      }
       return acc;
     }, {} as { [key: string]: any });
 
