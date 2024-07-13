@@ -205,13 +205,26 @@ const YamlEditor: React.FC = () => {
     );
   };
 
-  const [placeholderText, setPlaceholderText] = useState(
-    "Add Resource By Kind"
-  );
+  const getDefaultForType = (type: string) => {
+    switch (type) {
+      case "string":
+        return "";
+      case "number":
+        return 0;
+      case "boolean":
+        return false;
+      case "array":
+        return [];
+      case "object":
+        return {};
+      case "integer":
+        return 0;
+      default:
+        return null;
+    }
+  };
 
   const handleAddResource = (resourceType: string) => {
-    // Set the selected kind
-    setPlaceholderText(resourceType);
     // Ensure resourceType is a valid key of k8sDefinitions
     if (!(resourceType in k8sDefinitions)) {
       console.error(`Invalid resource type: ${resourceType}`);
@@ -228,17 +241,17 @@ const YamlEditor: React.FC = () => {
       return;
     }
 
-    // Access the properties
-    const properties = resource.properties;
+    // Access the properties with type assertion
+    const properties = resource.properties as {
+      [key: string]: { type: string };
+    };
 
     // Create a new resource object with only the properties of the selected kind
-    const newResource = Object.keys(properties).reduce(
-      (acc: any, key: string) => {
-        acc[key] = ""; // Initialize values as empty strings or default values
-        return acc;
-      },
-      {}
-    );
+    const newResource = Object.keys(properties).reduce((acc, key) => {
+      const propertyType = properties[key].type;
+      acc[key] = getDefaultForType(propertyType);
+      return acc;
+    }, {} as { [key: string]: any });
 
     setJsonObjects((prev) => [...prev, newResource]);
 
@@ -399,7 +412,7 @@ const YamlEditor: React.FC = () => {
                         base: "max-w-xs",
                         trigger: "h-12",
                       }}
-                      placeholder={placeholderText}
+                      placeholder="Select Resource By Kind"
                     >
                       {kinds.map((kind, index) => (
                         <SelectItem
