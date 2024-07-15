@@ -13,7 +13,16 @@ import NavBar from "./NavBar";
 import Stepper from "./Stepper";
 import { k8sDefinitions } from "./definitions";
 import { FaSearch } from "react-icons/fa";
-import { Autocomplete, AutocompleteItem } from "@nextui-org/autocomplete";
+import { IoRemove } from "react-icons/io5";
+import {
+  Dropdown,
+  Link,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Button,
+} from "@nextui-org/react";
+import { IoAdd } from "react-icons/io5";
 // Define types for Kubernetes templates
 
 const numberKeys = [
@@ -209,25 +218,6 @@ const YamlEditor: React.FC = () => {
     );
   };
 
-  const getDefaultForType = (type: string) => {
-    switch (type) {
-      case "string":
-        return "";
-      case "number":
-        return 0;
-      case "boolean":
-        return false;
-      case "array":
-        return [];
-      case "object":
-        return {};
-      case "integer":
-        return 0;
-      default:
-        return null;
-    }
-  };
-
   const handleDeleteResource = (index: number) => {
     setJsonObjects((prev) => {
       const updated = [...prev];
@@ -336,15 +326,75 @@ const YamlEditor: React.FC = () => {
 
   const kinds = Object.keys(k8sDefinitions) as (keyof typeof k8sDefinitions)[];
 
-  // Now kinds will be an array of string literals of the keys in k8sDefinitions
-  const getLastWord = (str: string): string => {
-    const segments = str.split(".");
-    return segments[segments.length - 1];
-  };
-
   {
     /******************************************************************** */
   }
+
+  const getDefaultForType = (type: string): any => {
+    switch (type) {
+      case "string":
+        return "";
+      case "number":
+        return 0;
+      case "boolean":
+        return false;
+      case "array":
+        return [];
+      case "object":
+        return {};
+      default:
+        return null;
+    }
+  };
+  // Now kinds will be an array of string literals of the keys in k8sDefinitions
+  const getLastWord = (str: string): string => {
+    const parts = str.split(".");
+    return parts[parts.length - 1];
+  };
+
+  // Function to resolve $ref recursively
+  const resolveRef = (refValue: string) => {
+    if (!(refValue in k8sDefinitions)) {
+      console.error(`$ref value not found in k8sDefinitions: ${refValue}`);
+      return {};
+    }
+
+    const nestedResource =
+      k8sDefinitions[refValue as keyof typeof k8sDefinitions];
+    if (
+      typeof nestedResource !== "object" ||
+      !("properties" in nestedResource)
+    ) {
+      console.error(`No properties found for $ref value: ${refValue}`);
+      return {};
+    }
+
+    const nestedProperties = nestedResource.properties as {
+      [key: string]: { type?: string; items?: any; $ref?: string };
+    };
+
+    return Object.keys(nestedProperties).reduce((acc, nestedKey) => {
+      const nestedProperty = nestedProperties[nestedKey];
+      if (nestedProperty.items && nestedProperty.items.$ref) {
+        const nestedRefValue = nestedProperty.items.$ref.replace(
+          "#/definitions/",
+          ""
+        );
+        acc[nestedKey] = [resolveRef(nestedRefValue)];
+      } else if (nestedProperty.$ref) {
+        const nestedRefValue = nestedProperty.$ref.replace(
+          "#/definitions/",
+          ""
+        );
+        acc[nestedKey] = resolveRef(nestedRefValue);
+      } else {
+        const nestedPropertyType = nestedProperty.type;
+        acc[nestedKey] = getDefaultForType(nestedPropertyType || "");
+      }
+      return acc;
+    }, {} as { [key: string]: any });
+  };
+
   const handleAddResource = (resourceType: string) => {
     // Ensure resourceType is a valid key of k8sDefinitions
     if (!(resourceType in k8sDefinitions)) {
@@ -364,7 +414,7 @@ const YamlEditor: React.FC = () => {
 
     // Access the properties with type assertion
     const properties = resource.properties as {
-      [key: string]: { type?: string; items?: any };
+      [key: string]: { type?: string; items?: any; $ref?: string };
     };
 
     // Create a new resource object with only the properties of the selected kind
@@ -372,11 +422,14 @@ const YamlEditor: React.FC = () => {
       const property = properties[key];
       if (key === "kind") {
         acc[key] = getLastWord(resourceType); // Set the kind property to the object name
-      } else if (property.items) {
-        // If items property exists, initialize it with an empty array
-        acc[key] = [];
-        // Add nested items key with null value for YAML
-        acc[key].push({ items: null });
+      } else if (property.items && property.items.$ref) {
+        // If items property exists and has $ref, process $ref
+        const refValue = property.items.$ref.replace("#/definitions/", "");
+        acc[key] = [resolveRef(refValue)];
+      } else if (property.$ref) {
+        // If $ref exists, process $ref
+        const refValue = property.$ref.replace("#/definitions/", "");
+        acc[key] = resolveRef(refValue);
       } else {
         const propertyType = property.type;
         acc[key] = getDefaultForType(propertyType || "");
@@ -384,6 +437,7 @@ const YamlEditor: React.FC = () => {
       return acc;
     }, {} as { [key: string]: any });
 
+    // Set the new resource object into the state
     setJsonObjects((prev) => [...prev, newResource]);
 
     try {
@@ -399,6 +453,11 @@ const YamlEditor: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+  const [ShowSearch, SetShowSearch] = useState<boolean>(false);
+
+  const handleSearchShow = () => {
+    SetShowSearch(!ShowSearch);
+  };
 
   const filteredSuggestions = kinds.filter((kind) => {
     const resource = k8sDefinitions[
@@ -436,58 +495,74 @@ const YamlEditor: React.FC = () => {
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold">Edit from inputs</h2>
                     <div className="flex gap-5">
-                      <>
-                        <button
-                          className="text-red-500 hover:text-red-600 font-semibold rounded-md shadow-sm"
-                          onClick={handleClearYaml}
-                        >
-                          <MdDeleteOutline className="h-5 w-5" />
+                      {!ShowSearch ? (
+                        <button className="text-green-500 hover:text-green-600 font-semibold rounded-md shadow-sm">
+                          <IoAdd
+                            onClick={handleSearchShow}
+                            className="h-5 w-5"
+                          />
                         </button>
-                      </>
+                      ) : (
+                        <button className="text-red-500 hover:text-red-600 font-semibold rounded-md shadow-sm">
+                          {" "}
+                          <IoRemove
+                            onClick={handleSearchShow}
+                            className="h-5 w-5"
+                          />
+                        </button>
+                      )}
+
+                      <button
+                        className="text-red-500 hover:text-red-600 font-semibold rounded-md shadow-sm"
+                        onClick={handleClearYaml}
+                      >
+                        <MdDeleteOutline className="h-5 w-5" />
+                      </button>
                     </div>
                   </div>
                   {/*********************************************** */}
 
-                  <div className="flex items-center justify-center w-full flex-wrap md:flex-nowrap gap-4">
-                    <div className="w-full max-w-md top-4 left-1/2 ">
-                      <div className="relative">
-                        <input
-                          type="text"
-                          placeholder="Search..."
-                          value={searchTerm}
-                          onChange={handleSearchChange}
-                          onFocus={() => setShowSuggestions(true)}
-                          onBlur={() => setShowSuggestions(false)}
-                          className=" text-gray-400 bg-gray-900 w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10  "
-                        />
-                        <div className="text-gray-400 absolute inset-y-0 right-0 flex items-center pr-3">
-                          <FaSearch className="h-4 w-4 text-muted-foreground" />
+                  {ShowSearch && (
+                    <div className="flex items-center justify-center w-full flex-wrap md:flex-nowrap gap-4">
+                      <div className="w-full max-w-md top-4 left-1/2 ">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            onFocus={() => setShowSuggestions(true)}
+                            onBlur={() => setShowSuggestions(false)}
+                            className=" text-gray-400 bg-gray-900 w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10  "
+                          />
+                          <div className="text-gray-400 absolute inset-y-0 right-0 flex items-center pr-3">
+                            <FaSearch className="h-4 w-4 text-muted-foreground" />
+                          </div>
                         </div>
-                      </div>
-                      {showSuggestions && filteredSuggestions.length > 0 && (
-                        <div className="mt-2 bg-gray-900 rounded-lg shadow-lg">
-                          <ul className="max-h-64 overflow-y-auto">
-                            {filteredSuggestions.map((suggestion, index) => (
-                              <li
-                                key={index}
-                                className="cursor-pointer px-4 py-3 text-sm hover:bg-gray-700 "
-                                onMouseDown={() =>
-                                  handleSuggestionClick(suggestion)
-                                } // Use onMouseDown to avoid closing the suggestion list prematurely
-                              >
-                                <div className="flex items-center gap-6">
-                                  <div className="flex flex-col ">
-                                    <span>{getLastWord(suggestion)}</span>
+                        {showSuggestions && filteredSuggestions.length > 0 && (
+                          <div className="mt-2 bg-gray-900 rounded-lg shadow-lg">
+                            <ul className="max-h-64 overflow-y-auto">
+                              {filteredSuggestions.map((suggestion, index) => (
+                                <li
+                                  key={index}
+                                  className="cursor-pointer px-4 py-3 text-sm hover:bg-gray-700 "
+                                  onMouseDown={() =>
+                                    handleSuggestionClick(suggestion)
+                                  } // Use onMouseDown to avoid closing the suggestion list prematurely
+                                >
+                                  <div className="flex items-center gap-6">
+                                    <div className="flex flex-col ">
+                                      <span>{getLastWord(suggestion)}</span>
+                                    </div>
                                   </div>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-
+                  )}
                   {/*********************************************** */}
                   <div id="jsonInputs" className="flex flex-col gap-4">
                     {jsonObjects.map((obj, index) => (
