@@ -12,8 +12,8 @@ import { GiCardExchange } from "react-icons/gi";
 import NavBar from "./NavBar";
 import Stepper from "./Stepper";
 import { k8sDefinitions } from "./definitions";
-import { Select, SelectItem } from "@nextui-org/react";
-
+import { FaSearch } from "react-icons/fa";
+import { Autocomplete, AutocompleteItem } from "@nextui-org/autocomplete";
 // Define types for Kubernetes templates
 
 const numberKeys = [
@@ -32,6 +32,10 @@ const isNumberKey = (path: string) => {
   const normalizedPath = path.replace(/\[(\d+)\]/g, ".$1");
   return numberKeys.includes(normalizedPath);
 };
+interface Resource {
+  description: string;
+  properties?: Record<string, any>;
+}
 
 const YamlEditor: React.FC = () => {
   const [yamlValue, setYamlValue] = useState<string>("");
@@ -388,6 +392,34 @@ const YamlEditor: React.FC = () => {
     return segments[segments.length - 1];
   };
 
+  {
+    /*********************************************************************** */
+  }
+
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+
+  const filteredSuggestions = kinds.filter((kind) => {
+    const resource = k8sDefinitions[
+      kind as keyof typeof k8sDefinitions
+    ] as Resource;
+    return (
+      kind.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      resource.properties &&
+      "kind" in resource.properties
+    );
+  });
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setShowSuggestions(true);
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setSearchTerm(getLastWord(suggestion));
+    setShowSuggestions(false);
+    handleAddResource(suggestion); // Call the function with the selected suggestion
+  };
   return (
     <div className="flex bg-gray-900">
       <NavBar />
@@ -414,34 +446,50 @@ const YamlEditor: React.FC = () => {
                     </div>
                   </div>
                   {/*********************************************** */}
-                  <div className="flex items-center justify-center">
-                    <Select
-                      classNames={{
-                        base: "max-w-xs",
-                        trigger: "h-12",
-                      }}
-                      placeholder="Select Resource By Kind"
-                    >
-                      {kinds.map((kind, index) => (
-                        <SelectItem
-                          key={index}
-                          value={kind}
-                          onClick={() => {
-                            handleAddResource(kind);
-                          }}
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className="flex flex-col">
-                              <span>{getLastWord(kind)}</span>
-                              <span className="text-sm text-gray-500">
-                                {getLastWord(kind)}
-                              </span>
-                            </div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </Select>
+
+                  <div className="flex items-center justify-center w-full flex-wrap md:flex-nowrap gap-4">
+                    <div className="w-full max-w-md top-4 left-1/2 ">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Search..."
+                          value={searchTerm}
+                          onChange={handleSearchChange}
+                          onFocus={() => setShowSuggestions(true)}
+                          onBlur={() => setShowSuggestions(false)}
+                          className=" text-gray-400 bg-gray-900 w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10  "
+                        />
+                        <div className="text-gray-400 absolute inset-y-0 right-0 flex items-center pr-3">
+                          <FaSearch className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      </div>
+                      {showSuggestions && filteredSuggestions.length > 0 && (
+                        <div className="mt-2 rounded-lg bg-background shadow-lg">
+                          <ul className="max-h-64 overflow-y-auto">
+                            {filteredSuggestions.map((suggestion, index) => (
+                              <li
+                                key={index}
+                                className="cursor-pointer px-4 py-2 text-sm hover:bg-muted"
+                                onMouseDown={() =>
+                                  handleSuggestionClick(suggestion)
+                                } // Use onMouseDown to avoid closing the suggestion list prematurely
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div className="flex flex-col">
+                                    <span>{getLastWord(suggestion)}</span>
+                                    <span className="text-sm text-gray-500">
+                                      {getLastWord(suggestion)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </div>
+
                   {/*********************************************** */}
                   <div id="jsonInputs" className="flex flex-col gap-4">
                     {jsonObjects.map((obj, index) => (
