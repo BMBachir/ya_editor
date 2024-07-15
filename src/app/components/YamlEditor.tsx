@@ -228,56 +228,6 @@ const YamlEditor: React.FC = () => {
     }
   };
 
-  const handleAddResource = (resourceType: string) => {
-    // Ensure resourceType is a valid key of k8sDefinitions
-    if (!(resourceType in k8sDefinitions)) {
-      console.error(`Invalid resource type: ${resourceType}`);
-      return;
-    }
-
-    // Extract the resource object with type assertion
-    const resource =
-      k8sDefinitions[resourceType as keyof typeof k8sDefinitions];
-
-    // Check if the resource has properties
-    if (!("properties" in resource)) {
-      console.error(`No properties found for resource type: ${resourceType}`);
-      return;
-    }
-
-    // Access the properties with type assertion
-    const properties = resource.properties as {
-      [key: string]: { type?: string; items?: any };
-    };
-
-    // Create a new resource object with only the properties of the selected kind
-    const newResource = Object.keys(properties).reduce((acc, key) => {
-      const property = properties[key];
-      if (property.items) {
-        // If items property exists, initialize it with an empty array
-        acc[key] = [];
-        // Add nested items key with null value for YAML
-        acc[key].push({ items: null });
-      } else {
-        const propertyType = property.type;
-        acc[key] = getDefaultForType(propertyType || "");
-      }
-      return acc;
-    }, {} as { [key: string]: any });
-
-    setJsonObjects((prev) => [...prev, newResource]);
-
-    try {
-      const updatedYaml = [
-        ...jsonObjects.map((obj) => yamlStringify(obj)),
-        yamlStringify(newResource),
-      ].join("---\n");
-      setYamlValue(updatedYaml);
-    } catch (error) {
-      console.error("Error updating YAML value:", error);
-    }
-  };
-
   const handleDeleteResource = (index: number) => {
     setJsonObjects((prev) => {
       const updated = [...prev];
@@ -395,6 +345,57 @@ const YamlEditor: React.FC = () => {
   {
     /******************************************************************** */
   }
+  const handleAddResource = (resourceType: string) => {
+    // Ensure resourceType is a valid key of k8sDefinitions
+    if (!(resourceType in k8sDefinitions)) {
+      console.error(`Invalid resource type: ${resourceType}`);
+      return;
+    }
+
+    // Extract the resource object with type assertion
+    const resource =
+      k8sDefinitions[resourceType as keyof typeof k8sDefinitions];
+
+    // Check if the resource has properties
+    if (!("properties" in resource)) {
+      console.error(`No properties found for resource type: ${resourceType}`);
+      return;
+    }
+
+    // Access the properties with type assertion
+    const properties = resource.properties as {
+      [key: string]: { type?: string; items?: any };
+    };
+
+    // Create a new resource object with only the properties of the selected kind
+    const newResource = Object.keys(properties).reduce((acc, key) => {
+      const property = properties[key];
+      if (key === "kind") {
+        acc[key] = getLastWord(resourceType); // Set the kind property to the object name
+      } else if (property.items) {
+        // If items property exists, initialize it with an empty array
+        acc[key] = [];
+        // Add nested items key with null value for YAML
+        acc[key].push({ items: null });
+      } else {
+        const propertyType = property.type;
+        acc[key] = getDefaultForType(propertyType || "");
+      }
+      return acc;
+    }, {} as { [key: string]: any });
+
+    setJsonObjects((prev) => [...prev, newResource]);
+
+    try {
+      const updatedYaml = [
+        ...jsonObjects.map((obj) => yamlStringify(obj)),
+        yamlStringify(newResource),
+      ].join("---\n");
+      setYamlValue(updatedYaml);
+    } catch (error) {
+      console.error("Error updating YAML value:", error);
+    }
+  };
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
