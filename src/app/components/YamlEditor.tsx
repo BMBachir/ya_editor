@@ -460,26 +460,23 @@ const YamlEditor: React.FC = () => {
                           className=" text-gray-400 bg-gray-900 w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10  "
                         />
                         <div className="text-gray-400 absolute inset-y-0 right-0 flex items-center pr-3">
-                          <FaSearch className="h-5 w-5 text-muted-foreground" />
+                          <FaSearch className="h-4 w-4 text-muted-foreground" />
                         </div>
                       </div>
                       {showSuggestions && filteredSuggestions.length > 0 && (
-                        <div className="mt-2 rounded-lg bg-background shadow-lg">
+                        <div className="mt-2 bg-gray-900 rounded-lg shadow-lg">
                           <ul className="max-h-64 overflow-y-auto">
                             {filteredSuggestions.map((suggestion, index) => (
                               <li
                                 key={index}
-                                className="cursor-pointer px-4 py-2 text-sm hover:bg-muted"
+                                className="cursor-pointer px-4 py-3 text-sm hover:bg-gray-700 "
                                 onMouseDown={() =>
                                   handleSuggestionClick(suggestion)
                                 } // Use onMouseDown to avoid closing the suggestion list prematurely
                               >
-                                <div className="flex items-center gap-2">
-                                  <div className="flex flex-col">
+                                <div className="flex items-center gap-6">
+                                  <div className="flex flex-col ">
                                     <span>{getLastWord(suggestion)}</span>
-                                    <span className="text-sm text-gray-500">
-                                      {getLastWord(suggestion)}
-                                    </span>
                                   </div>
                                 </div>
                               </li>
