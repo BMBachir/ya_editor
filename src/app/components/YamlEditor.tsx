@@ -11,7 +11,7 @@ import { FaFileUpload } from "react-icons/fa";
 import { GiCardExchange } from "react-icons/gi";
 import NavBar from "./NavBar";
 import Stepper from "./Stepper";
-import { k8sDefinitions } from "./definitions";
+import { k8sDefinitions } from "./data/definitions";
 import { FaSearch } from "react-icons/fa";
 import { IoRemove } from "react-icons/io5";
 import {
@@ -52,12 +52,6 @@ const YamlEditor: React.FC = () => {
 
   const toggleConvert = () => {
     setIsYamlToJson(!isYamlToJson);
-  };
-
-  const [showPopup, setShowPopup] = useState(false);
-
-  const togglePopup = () => {
-    setShowPopup(!showPopup);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {

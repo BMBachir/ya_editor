@@ -1,4 +1,4 @@
-import { k8sDefinitions } from "../definitions";
+import { k8sDefinitions } from "../data/definitions";
 
 const numberKeys = [
   "spec.replicas",
