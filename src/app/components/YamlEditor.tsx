@@ -15,13 +15,12 @@ import { k8sDefinitions } from "./definitions";
 import { FaSearch } from "react-icons/fa";
 import { IoRemove } from "react-icons/io5";
 import {
-  Dropdown,
-  Link,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  Button,
-} from "@nextui-org/react";
+  isNumberKey,
+  getDefaultForType,
+  getLastWord,
+  updateNestedObject,
+  resolveRef,
+} from "./UtilityFunctions/utils";
 import { IoAdd } from "react-icons/io5";
 // Define types for Kubernetes templates
 
@@ -37,10 +36,6 @@ const numberKeys = [
   "spec.template.spec.containers.0.resources.requests.memory",
 ];
 
-const isNumberKey = (path: string) => {
-  const normalizedPath = path.replace(/\[(\d+)\]/g, ".$1");
-  return numberKeys.includes(normalizedPath);
-};
 interface Resource {
   description: string;
   properties?: Record<string, any>;
@@ -130,15 +125,6 @@ const YamlEditor: React.FC = () => {
       setYamlValue(updatedYaml);
       return updated;
     });
-  };
-
-  const updateNestedObject = (obj: any, path: string, newValue: any) => {
-    const keys = path.split(".");
-    let current = obj;
-    for (let i = 0; i < keys.length - 1; i++) {
-      current = current[keys[i]] = current[keys[i]] || {};
-    }
-    current[keys[keys.length - 1]] = newValue;
   };
 
   const handleKeyChange = (index: number, oldPath: string, newKey: string) => {
@@ -330,70 +316,7 @@ const YamlEditor: React.FC = () => {
     /******************************************************************** */
   }
 
-  const getDefaultForType = (type: string): any => {
-    switch (type) {
-      case "string":
-        return "";
-      case "number":
-        return 0;
-      case "boolean":
-        return false;
-      case "array":
-        return [];
-      case "object":
-        return {};
-      default:
-        return null;
-    }
-  };
   // Now kinds will be an array of string literals of the keys in k8sDefinitions
-  const getLastWord = (str: string): string => {
-    const parts = str.split(".");
-    return parts[parts.length - 1];
-  };
-
-  // Function to resolve $ref recursively
-  const resolveRef = (refValue: string) => {
-    if (!(refValue in k8sDefinitions)) {
-      console.error(`$ref value not found in k8sDefinitions: ${refValue}`);
-      return {};
-    }
-
-    const nestedResource =
-      k8sDefinitions[refValue as keyof typeof k8sDefinitions];
-    if (
-      typeof nestedResource !== "object" ||
-      !("properties" in nestedResource)
-    ) {
-      console.error(`No properties found for $ref value: ${refValue}`);
-      return {};
-    }
-
-    const nestedProperties = nestedResource.properties as {
-      [key: string]: { type?: string; items?: any; $ref?: string };
-    };
-
-    return Object.keys(nestedProperties).reduce((acc, nestedKey) => {
-      const nestedProperty = nestedProperties[nestedKey];
-      if (nestedProperty.items && nestedProperty.items.$ref) {
-        const nestedRefValue = nestedProperty.items.$ref.replace(
-          "#/definitions/",
-          ""
-        );
-        acc[nestedKey] = [resolveRef(nestedRefValue)];
-      } else if (nestedProperty.$ref) {
-        const nestedRefValue = nestedProperty.$ref.replace(
-          "#/definitions/",
-          ""
-        );
-        acc[nestedKey] = resolveRef(nestedRefValue);
-      } else {
-        const nestedPropertyType = nestedProperty.type;
-        acc[nestedKey] = getDefaultForType(nestedPropertyType || "");
-      }
-      return acc;
-    }, {} as { [key: string]: any });
-  };
 
   const handleAddResource = (resourceType: string) => {
     // Ensure resourceType is a valid key of k8sDefinitions
