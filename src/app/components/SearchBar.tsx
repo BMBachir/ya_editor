@@ -6,7 +6,7 @@ import { IoAdd, IoRemove } from "react-icons/io5";
 import { useYamlContext } from "./context/YamlContext";
 import { getLastWord } from "./UtilityFunctions/utils";
 import { k8sDefinitions } from "./data/definitions";
-import { MdDeleteOutline } from "react-icons/md";
+import { MdClearAll } from "react-icons/md";
 const SearchBar: React.FC = () => {
   const {
     searchTerm,
@@ -56,21 +56,21 @@ const SearchBar: React.FC = () => {
             className="text-red-500 hover:text-red-600 font-semibold rounded-md shadow-sm"
             onClick={handleClearYaml}
           >
-            <MdDeleteOutline className="h-5 w-5" />
+            <MdClearAll className="h-6 w-6" />
           </button>
           {!ShowSearch ? (
             <button
               className="text-green-500 hover:text-green-600 font-semibold rounded-md shadow-sm"
               onClick={handleSearchShow}
             >
-              <IoAdd className="h-5 w-5" />
+              <IoAdd className="h-6 w-6" />
             </button>
           ) : (
             <button
               className="text-red-500 hover:text-red-600 font-semibold rounded-md shadow-sm"
               onClick={handleSearchShow}
             >
-              <IoRemove className="h-5 w-5" />
+              <IoRemove className="h-6 w-6" />
             </button>
           )}
         </div>
