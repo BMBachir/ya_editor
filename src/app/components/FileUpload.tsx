@@ -7,7 +7,7 @@ const FileUpload: React.FC = () => {
   const { fileInputRef, handleFileChange } = useYamlContext();
 
   return (
-    <div className="relative w-[130px] h-[50px]">
+    <div className="relative w-[130px] ">
       <input
         type="file"
         ref={fileInputRef}

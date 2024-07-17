@@ -41,7 +41,7 @@ const YamlEditor: React.FC = () => {
                       onChange={handleEditorChange}
                       className="w-full"
                     />
-                    <div className="mt-4 flex items-center justify-center gap-5">
+                    <div className=" flex items-center justify-center gap-5">
                       <FileUpload />
                       <YamlJsonToggle />
                     </div>
