@@ -27,10 +27,8 @@ const YamlEditor: React.FC = () => {
               </div>
               <div className="flex flex-col md:flex-row flex-1">
                 <div className="bg-gray-800 p-6 w-full md:w-1/3 flex flex-col rounded-lg gap-6 h-[720px] overflow-auto">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold">Edit from inputs</h2>
-                    <SearchBar />
-                  </div>
+                  <SearchBar />
+
                   <ResourceEditor />
                 </div>
                 <div className="flex-1 ml-7 bg-gray-800">
