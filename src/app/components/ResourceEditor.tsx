@@ -1,9 +1,8 @@
 // components/ResourceEditor.tsx
 import React from "react";
 import { useYamlContext } from "./context/YamlContext";
-import { IoIosAdd } from "react-icons/io";
-import { MdDeleteOutline } from "react-icons/md";
-
+import { LuDelete } from "react-icons/lu";
+import { FcDeleteRow } from "react-icons/fc";
 const ResourceEditor: React.FC = () => {
   const {
     jsonObjects,
@@ -24,6 +23,9 @@ const ResourceEditor: React.FC = () => {
             <h3 className="text-lg font-medium mb-2">
               Kind: {obj.kind || "Unknown"}
             </h3>
+            <button className="text-red-500 hover:text-red-600 font-semibold rounded-md shadow-sm">
+              <LuDelete className="h-5 w-5" />
+            </button>
             <span>{expandedResourceIndex === index ? "-" : "+"}</span>
           </div>
           {expandedResourceIndex === index && (
