@@ -28,11 +28,21 @@ const SearchBar: React.FC = () => {
     setJsonObjects([]);
   };
 
-  const filteredSuggestions = Object.keys(k8sDefinitions).filter((kind) => {
-    const resource = k8sDefinitions[kind as keyof typeof k8sDefinitions];
+  interface Resource {
+    description: string;
+    properties?: Record<string, any>;
+  }
+
+  const kinds = Object.keys(k8sDefinitions) as (keyof typeof k8sDefinitions)[];
+
+  const filteredSuggestions = kinds.filter((kind) => {
+    const resource = k8sDefinitions[
+      kind as keyof typeof k8sDefinitions
+    ] as Resource;
     return (
       kind.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      resource.hasOwnProperty("properties")
+      resource.properties &&
+      "kind" in resource.properties
     );
   });
 
