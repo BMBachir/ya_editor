@@ -14,9 +14,15 @@ const ResourceEditor: React.FC = () => {
   } = useYamlContext();
 
   return (
-    <div id="jsonInputs" className="flex flex-col gap-4">
+    <div
+      id="jsonInputs"
+      className="flex flex-col gap-4 transition-all duration-300"
+    >
       {jsonObjects.map((obj, index) => (
-        <div key={index} className="bg-gray-700 p-4 rounded-lg">
+        <div
+          key={index}
+          className="bg-gray-700 p-4 rounded-lg transition-all duration-1000"
+        >
           <div
             className="flex items-center justify-between cursor-pointer"
             onClick={() => toggleKindVisibility(index)}
@@ -41,7 +47,7 @@ const ResourceEditor: React.FC = () => {
             </div>
           </div>
           {expandedResourceIndex === index && (
-            <div className="rounded-md">
+            <div className="rounded-md transition-all duration-1000">
               {renderInputs(obj, index)}
               <button
                 className="btn bg-red-400 hover:bg-red-500 w-full mt-2"

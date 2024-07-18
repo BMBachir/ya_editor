@@ -15,7 +15,7 @@ const NavBar = () => {
 
   return (
     <div
-      className={`fixed top-0 left-0 h-screen flex flex-col justify-between transition-all duration-300 bg-gray-800 ${
+      className={`fixed top-0 left-0 h-screen flex flex-col justify-between transition-all duration-900 bg-gray-800 ${
         isNavVisible ? "w-64" : "w-16"
       }`}
     >
