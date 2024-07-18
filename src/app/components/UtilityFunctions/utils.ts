@@ -71,6 +71,7 @@ export const resolveRef = (refValue: string): any => {
       const nestedPropertyType = nestedProperty.type;
       acc[nestedKey] = getDefaultForType(nestedPropertyType || "");
     }
+
     return acc;
   }, {} as { [key: string]: any });
 };

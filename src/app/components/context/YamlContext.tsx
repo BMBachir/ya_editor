@@ -166,9 +166,6 @@ export const YamlProvider: React.FC<{ children: React.ReactNode }> = ({
       const property = properties[key];
       if (key === "kind") {
         acc[key] = getLastWord(resourceType);
-      } else if (property.items && property.items.$ref) {
-        const refValue = property.items.$ref.replace("#/definitions/", "");
-        acc[key] = [resolveRef(refValue)];
       } else if (property.$ref) {
         const refValue = property.$ref.replace("#/definitions/", "");
         acc[key] = resolveRef(refValue);
