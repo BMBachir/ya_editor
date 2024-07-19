@@ -23,13 +23,17 @@ export const updateNestedObject = (
   obj: any,
   path: string,
   newValue: any
-): void => {
+): any => {
   const keys = path.split(".");
   let current = obj;
   for (let i = 0; i < keys.length - 1; i++) {
-    current = current[keys[i]] = current[keys[i]] || {};
+    if (!current[keys[i]]) {
+      current[keys[i]] = {};
+    }
+    current = current[keys[i]];
   }
   current[keys[keys.length - 1]] = newValue;
+  return obj;
 };
 
 // Get the last word from a dot-separated string
