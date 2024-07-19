@@ -1,52 +1,100 @@
-// components/YamlEditor.tsx
 "use client";
 import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { yaml } from "@codemirror/lang-yaml";
 import { oneDark } from "@codemirror/theme-one-dark";
-import { useYamlContext } from "./context/YamlContext";
-import YamlJsonToggle from "./YamlJsonToggle";
-import FileUpload from "./FileUpload";
-import ResourceEditor from "./ResourceEditor";
 import NavBar from "./NavBar";
 import Stepper from "./Stepper";
+import { useYamlEditorState } from "./Hooks/useYamlEditorState";
+import { useResourceManagement } from "./Hooks/useResourceManagement";
+import { useSearch } from "./Hooks/useSearch";
+import ResourceEditor from "./ResourceEditor";
+import FileUpload from "./FileUpload";
+import YamlJsonToggle from "./YamlJsonToggle";
 import SearchBar from "./SearchBar";
 
 const YamlEditor: React.FC = () => {
-  const { yamlValue, handleEditorChange } = useYamlContext();
+  const {
+    yamlValue,
+    setYamlValue,
+    isYamlToJson,
+    setIsYamlToJson,
+    fileInputRef,
+    handleFileChange,
+    handleYamlToJson,
+    handleJsonToYaml,
+    handleClearYaml,
+  } = useYamlEditorState();
+
+  const {
+    jsonObjects,
+    expandedResourceIndex,
+    setExpandedResourceIndex,
+    handleAddResource,
+    toggleKindVisibility,
+    handleDeleteResource,
+  } = useResourceManagement(setYamlValue);
+
+  const {
+    searchTerm,
+    showSearch,
+    handleSearchChange,
+    setShowSuggestions,
+    handleSuggestionClick,
+    handleSearchShow,
+    showSuggestions,
+    filteredSuggestions,
+    handleClearSearch,
+  } = useSearch(handleAddResource);
 
   return (
-    <div className="flex bg-gray-900">
+    <div className="flex">
       <NavBar />
-      <div className="flex flex-col md:flex-row flex-1 ml-64">
-        <div className="flex-1 bg-gray-800 overflow-auto custom-scrollbar">
-          <div className="flex flex-col min-h-screen bg-gray-900 text-white">
-            <div className="container">
-              <div className="mt-24 flex flex-col items-center gap-5 mb-10">
-                <Stepper />
+      <div className="flex flex-col md:flex-row flex-1 ">
+        <div className="flex-1 overflow-auto custom-scrollbar">
+          <div className="flex flex-col min-h-screen bg-backgroundColor text-white">
+            <Stepper />
+            <div className="flex flex-col p-4">
+              <FileUpload
+                fileInputRef={fileInputRef}
+                handleFileChange={handleFileChange}
+              />
+              <YamlJsonToggle
+                isYamlToJson={isYamlToJson}
+                setIsYamlToJson={setIsYamlToJson}
+                handleYamlToJson={handleYamlToJson}
+                handleJsonToYaml={handleJsonToYaml}
+              />
+              <SearchBar
+                handleClearSearch={handleClearSearch}
+                setShowSuggestions={setShowSuggestions}
+                handleClearYaml={handleClearYaml}
+                searchTerm={searchTerm}
+                showSearch={showSearch}
+                handleSearchChange={handleSearchChange}
+                handleSearchShow={handleSearchShow}
+                showSuggestions={showSuggestions}
+                filteredSuggestions={filteredSuggestions}
+                handleSuggestionClick={handleSuggestionClick}
+              />
+              <div className="flex flex-col mt-4 flex-1">
+                <CodeMirror
+                  value={yamlValue}
+                  height="60vh"
+                  theme={oneDark}
+                  extensions={[yaml()]}
+                  onChange={(value) => setYamlValue(value)}
+                />
               </div>
-              <div className="flex flex-col md:flex-row flex-1">
-                <div className="bg-gray-800 p-6 w-full md:w-1/3 flex flex-col rounded-lg gap-6 h-[720px] overflow-auto">
-                  <SearchBar />
 
-                  <ResourceEditor />
-                </div>
-                <div className="flex-1 ml-7 bg-gray-800">
-                  <div className="flex flex-col items-center justify-center">
-                    <CodeMirror
-                      value={yamlValue}
-                      height="680px"
-                      theme={oneDark}
-                      extensions={[yaml()]}
-                      onChange={handleEditorChange}
-                      className="w-full"
-                    />
-                    <div className=" flex items-center justify-center gap-5">
-                      <FileUpload />
-                      <YamlJsonToggle />
-                    </div>
-                  </div>
-                </div>
+              <div className="mt-4">
+                <ResourceEditor
+                  jsonObjects={jsonObjects}
+                  expandedResourceIndex={expandedResourceIndex}
+                  toggleKindVisibility={toggleKindVisibility}
+                  handleDeleteResource={handleDeleteResource}
+                  setYamlValue={setYamlValue}
+                />
               </div>
             </div>
           </div>
