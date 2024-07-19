@@ -19,7 +19,7 @@ const YamlJsonToggle: React.FC<YamlJsonToggleProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-center gap-5">
+    <div className="">
       {isYamlToJson ? (
         <button
           className="inline-flex gap-3 items-center justify-center px-6 py-3 text-gray-100 hover:text-hoverColor cursor-pointer transition-colors "

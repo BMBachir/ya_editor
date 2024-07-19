@@ -1,14 +1,23 @@
 import React from "react";
 import { MdDeleteOutline } from "react-icons/md";
-import { IoIosAdd, IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 import { isNumberKey } from "./UtilityFunctions/utils";
 
 interface ResourceEditorProps {
-  jsonObjects: any[]; // Update with a more specific type if possible
+  jsonObjects: any[];
   expandedResourceIndex: number | null;
   toggleKindVisibility: (index: number) => void;
   handleDeleteResource: (index: number) => void;
-  setYamlValue: React.Dispatch<React.SetStateAction<string>>;
+  handleKeyChange: (
+    resourceIndex: number,
+    path: string,
+    newKey: string
+  ) => void;
+  handleInputChange: (
+    resourceIndex: number,
+    path: string,
+    newValue: any
+  ) => void;
 }
 
 const ResourceEditor: React.FC<ResourceEditorProps> = ({
@@ -16,60 +25,9 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   expandedResourceIndex,
   toggleKindVisibility,
   handleDeleteResource,
-  setYamlValue,
+  handleKeyChange,
+  handleInputChange,
 }) => {
-  const handleKeyChange = (
-    resourceIndex: number,
-    path: string,
-    newKey: string
-  ) => {
-    const updatedJsonObjects = jsonObjects.map((obj, index) => {
-      if (index === resourceIndex) {
-        // Handle key change logic here
-        const newObj = { ...obj };
-        const parts = path.split(".");
-        const lastKey = parts.pop();
-        let target = newObj;
-        for (const part of parts) {
-          target = target[part];
-        }
-        if (lastKey) {
-          const value = target[lastKey];
-          delete target[lastKey];
-          target[newKey] = value;
-        }
-        return newObj;
-      }
-      return obj;
-    });
-
-    setYamlValue(JSON.stringify(updatedJsonObjects, null, 2)); // Update YAML
-  };
-
-  const handleValueChange = (
-    resourceIndex: number,
-    path: string,
-    newValue: string
-  ) => {
-    const updatedJsonObjects = jsonObjects.map((obj, index) => {
-      if (index === resourceIndex) {
-        // Handle value change logic here
-        const newObj = { ...obj };
-        const parts = path.split(".");
-        let target = newObj;
-        for (const part of parts.slice(0, -1)) {
-          target = target[part];
-        }
-        const lastKey = parts[parts.length - 1];
-        target[lastKey] = newValue;
-        return newObj;
-      }
-      return obj;
-    });
-
-    setYamlValue(JSON.stringify(updatedJsonObjects, null, 2)); // Update YAML
-  };
-
   const renderInputs = (obj: any, index: number, path = ""): JSX.Element[] => {
     return Object.keys(obj).map((key) => {
       const value = obj[key];
@@ -86,15 +44,17 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
             >
               Key:
             </label>
-            <input
-              id={`${inputKey}-key`}
-              type="text"
-              value={key}
-              onChange={(e) =>
-                handleKeyChange(index, currentPath, e.target.value)
-              }
-              className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
-            />
+            <div>
+              <input
+                id={`${inputKey}-key`}
+                type="text"
+                value={key}
+                onChange={(e) =>
+                  handleKeyChange(index, currentPath, e.target.value)
+                }
+                className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
+              />
+            </div>
           </div>
           <div>
             <label
@@ -103,15 +63,39 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
             >
               Value:
             </label>
-            <input
-              id={`${inputKey}-value`}
-              type="text"
-              value={value}
-              onChange={(e) =>
-                handleValueChange(index, currentPath, e.target.value)
-              }
-              className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
-            />
+            {typeof value === "object" && value !== null ? (
+              <div className="ml-4">
+                {renderInputs(value, index, currentPath)}
+              </div>
+            ) : isNumber ? (
+              <div>
+                <input
+                  id={`${inputKey}-value`}
+                  type="number"
+                  value={value === null ? "" : value} // Ensure value is not null
+                  onChange={(e) =>
+                    handleInputChange(
+                      index,
+                      currentPath,
+                      e.target.value === "" ? null : Number(e.target.value)
+                    )
+                  }
+                  className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
+                />
+              </div>
+            ) : (
+              <div>
+                <input
+                  id={`${inputKey}-value`}
+                  type="text"
+                  value={value === null ? "" : value} // Ensure value is not null
+                  onChange={(e) =>
+                    handleInputChange(index, currentPath, e.target.value)
+                  }
+                  className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
+                />
+              </div>
+            )}
           </div>
         </div>
       );
@@ -119,9 +103,12 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   };
 
   return (
-    <div>
+    <div id="jsonInputs" className="flex flex-col gap-4 outline-none">
       {jsonObjects.map((obj, index) => (
-        <div key={index} className="mb-4 border p-4 rounded-md bg-gray-800">
+        <div
+          key={index}
+          className="mb-4 border p-4 rounded-md bg-backgrounColor2 outline-none"
+        >
           <div className="flex items-center justify-between">
             <button
               onClick={() => toggleKindVisibility(index)}
@@ -132,7 +119,9 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
               ) : (
                 <IoIosArrowForward className="h-5 w-5" />
               )}
-              Resource {index + 1}
+              <h3 className="text-lg font-medium mb-2">
+                Kind: {obj.kind || "Unknown"}
+              </h3>
             </button>
             <button
               onClick={() => handleDeleteResource(index)}

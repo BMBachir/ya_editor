@@ -1,6 +1,5 @@
 "use client";
 import React, { ChangeEvent } from "react";
-import { FaSearch } from "react-icons/fa";
 import { IoAdd, IoRemove } from "react-icons/io5";
 import { MdClearAll } from "react-icons/md";
 import { CiCircleRemove } from "react-icons/ci";
@@ -34,7 +33,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Edit from inputs</h2>
+        <h2 className="text-xl font-semibold ">Edit from inputs</h2>
         <div className="flex items-center gap-6">
           <button
             className="text-red-500 hover:text-red-600 font-semibold rounded-md shadow-sm"
