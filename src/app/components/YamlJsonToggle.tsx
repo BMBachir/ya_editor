@@ -1,11 +1,22 @@
-// components/YamlJsonToggle.tsx
 import React from "react";
 import { GiCardExchange } from "react-icons/gi";
-import { useYamlContext } from "./context/YamlContext";
 
-const YamlJsonToggle: React.FC = () => {
-  const { isYamlToJson, handleYamlToJson, handleJsonToYaml, toggleConvert } =
-    useYamlContext();
+interface YamlJsonToggleProps {
+  isYamlToJson: boolean;
+  setIsYamlToJson: React.Dispatch<React.SetStateAction<boolean>>;
+  handleYamlToJson: () => void;
+  handleJsonToYaml: () => void;
+}
+
+const YamlJsonToggle: React.FC<YamlJsonToggleProps> = ({
+  isYamlToJson,
+  setIsYamlToJson,
+  handleYamlToJson,
+  handleJsonToYaml,
+}) => {
+  const toggleConvert = () => {
+    setIsYamlToJson(!isYamlToJson);
+  };
 
   return (
     <div className="flex items-center justify-center gap-5">
