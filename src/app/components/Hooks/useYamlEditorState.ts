@@ -1,4 +1,3 @@
-"use client";
 import { useState, useRef } from "react";
 import { parseAllDocuments, stringify as yamlStringify } from "yaml";
 import { parse as jsonParse, stringify as jsonStringify } from "json5";
@@ -44,6 +43,7 @@ export const useYamlEditorState = () => {
       console.error("Error converting YAML to JSON:", error);
     }
   };
+
   const handleJsonToYaml = () => {
     try {
       const obj = jsonParse(yamlValue);

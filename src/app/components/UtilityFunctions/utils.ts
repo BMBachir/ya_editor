@@ -43,7 +43,17 @@ export const getLastWord = (str: string): string => {
 };
 
 // Resolve $ref recursively to get nested properties
-export const resolveRef = (refValue: string): any => {
+export const resolveRef = (
+  refValue: string,
+  visited = new Set<string>()
+): any => {
+  if (visited.has(refValue)) {
+    console.warn(`Circular reference detected: ${refValue}`);
+    return {};
+  }
+
+  visited.add(refValue);
+
   if (!(refValue in k8sDefinitions)) {
     console.error(`$ref value not found in k8sDefinitions: ${refValue}`);
     return {};
@@ -67,10 +77,10 @@ export const resolveRef = (refValue: string): any => {
         "#/definitions/",
         ""
       );
-      acc[nestedKey] = [resolveRef(nestedRefValue)];
+      acc[nestedKey] = resolveRef(nestedRefValue, visited);
     } else if (nestedProperty.$ref) {
       const nestedRefValue = nestedProperty.$ref.replace("#/definitions/", "");
-      acc[nestedKey] = resolveRef(nestedRefValue);
+      acc[nestedKey] = resolveRef(nestedRefValue, visited);
     } else {
       const nestedPropertyType = nestedProperty.type;
       acc[nestedKey] = getDefaultForType(nestedPropertyType || "");

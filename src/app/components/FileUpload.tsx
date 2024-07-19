@@ -1,6 +1,5 @@
 import React, { ChangeEvent, RefObject } from "react";
 import { FaFileUpload } from "react-icons/fa";
-import { useYamlEditorState } from "./Hooks/useYamlEditorState";
 
 interface FileUploadProps {
   fileInputRef: RefObject<HTMLInputElement>;
@@ -12,7 +11,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   handleFileChange,
 }) => {
   return (
-    <div className="relative w-[130px]">
+    <div className="relative w-[130px] h-[50px]">
       <input
         type="file"
         ref={fileInputRef}
@@ -21,12 +20,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
         onChange={handleFileChange}
       />
       <div
-        className="flex items-center justify-center absolute top-0 left-0 h-full text-[15px] text-gray-100 hover:text-hoverColor cursor-pointer transition-colors"
+        className="flex items-center justify-center absolute top-0 left-0 h-full text-[15px] text-gray-100 hover:text-hoverColor cursor-pointer  transition-colors"
         onClick={() => fileInputRef.current?.click()}
       >
         <div className="flex items-center justify-center gap-3">
-          <FaFileUpload className="h-5 w-5" />
-          <span>Upload YAML</span>
+          <FaFileUpload className="h-5 w-5" /> <span>Upload YAML</span>
         </div>
       </div>
     </div>

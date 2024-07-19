@@ -1,4 +1,3 @@
-// Hooks/useResourceManagement.ts
 "use client";
 import { useState, Dispatch, SetStateAction } from "react";
 import {
@@ -34,7 +33,6 @@ export const useResourceManagement = (
   const [expandedResourceIndex, setExpandedResourceIndex] = useState<
     number | null
   >(null);
-  const [jsonObjectsState, setJsonObjectsState] = useState<JsonObject[]>([]);
   const [jsonObjects, setJsonObjects] = useState<JsonObject[]>([]);
 
   const handleAddResource = (resourceType: string) => {
@@ -69,7 +67,7 @@ export const useResourceManagement = (
       return acc;
     }, {} as JsonObject);
 
-    setJsonObjectsState((prev) => {
+    setJsonObjects((prev) => {
       const updated = [...prev, newResource];
       const updatedYaml = updated
         .map((item) => yamlStringify(item))
@@ -86,7 +84,7 @@ export const useResourceManagement = (
   };
 
   const handleDeleteResource = (index: number) => {
-    setJsonObjectsState((prev) => {
+    setJsonObjects((prev) => {
       const updated = [...prev];
       updated.splice(index, 1);
       const updatedYaml = updated
@@ -100,8 +98,8 @@ export const useResourceManagement = (
   const handleAddNestedField = (index: number, path: string) => {
     setJsonObjects((prev) => {
       const updated = [...prev];
-      const nestedPath = `${path}.newField`; // Fixed template literal syntax
-      updateNestedObject(updated[index], nestedPath, ""); // Set default value as an empty string
+      const nestedPath = `${path}.newField`;
+      updateNestedObject(updated[index], nestedPath, "");
       const updatedYaml = updated
         .map((item) => yamlStringify(item))
         .join("---\n");
@@ -182,7 +180,6 @@ export const useResourceManagement = (
     });
   };
 
-  // Add these to the return object
   return {
     jsonObjects,
     expandedResourceIndex,
