@@ -5,11 +5,9 @@ import { NextUIProvider } from "@nextui-org/system";
 import { YamlProvider } from "./components/context/YamlContext";
 const Home: NextPage = () => {
   return (
-    <YamlProvider>
-      <NextUIProvider>
-        <YamlEditor />
-      </NextUIProvider>
-    </YamlProvider>
+    <NextUIProvider>
+      <YamlEditor />
+    </NextUIProvider>
   );
 };
 
