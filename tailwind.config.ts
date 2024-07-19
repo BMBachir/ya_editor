@@ -11,6 +11,8 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        backgroundColor: "#021825",
+        backgrounColor2: "#071B27",
         primaryColor: "#00ADEF",
         yellowColor: "#FEB60D",
         purpleColor: "#9771FF",

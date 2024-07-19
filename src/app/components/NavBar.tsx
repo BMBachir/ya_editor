@@ -15,7 +15,7 @@ const NavBar = () => {
 
   return (
     <div
-      className={`fixed top-0 left-0 h-screen flex flex-col justify-between transition-all duration-900 bg-gray-800 ${
+      className={` top-0 left-0 h-screen bg-backgrounColor2 flex flex-col justify-between transition-all duration-900  ${
         isNavVisible ? "w-64" : "w-16"
       }`}
     >
@@ -71,7 +71,7 @@ const NavBar = () => {
           </div>
         )}
       </div>
-      <div className="px-4 py-2 flex items-center justify-center bg-gray-800">
+      <div className="px-4 py-2 flex items-center justify-center bg-backgrounColor2">
         {isNavVisible ? (
           <LuArrowLeftToLine
             className="h-6 w-6 cursor-pointer hover:text-hoverColor"
