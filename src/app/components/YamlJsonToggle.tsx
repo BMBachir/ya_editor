@@ -1,4 +1,4 @@
-import React from "react";
+// YAML to JSON/JSON to YAML Toggle Component
 import { GiCardExchange } from "react-icons/gi";
 
 interface YamlJsonToggleProps {

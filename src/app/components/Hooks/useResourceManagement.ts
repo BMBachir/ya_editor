@@ -1,13 +1,24 @@
 "use client";
-import { useState, Dispatch, SetStateAction } from "react";
+import {
+  useState,
+  Dispatch,
+  SetStateAction,
+  ChangeEvent,
+  RefObject,
+} from "react";
 import {
   updateNestedObject,
   resolveRef,
   getDefaultForType,
   getLastWord,
+  isNumberKey,
 } from "../UtilityFunctions/utils";
 import { k8sDefinitions } from "../data/definitions";
-import { stringify as yamlStringify } from "yaml";
+import { stringify as yamlStringify, parseAllDocuments } from "yaml";
+import { parse as jsonParse, stringify as jsonStringify } from "json5";
+import { FaFileUpload } from "react-icons/fa";
+import { MdDeleteOutline } from "react-icons/md";
+import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 
 type ResourceProperties = {
   [key: string]: {
@@ -27,6 +38,7 @@ type JsonObject = {
   [key: string]: any;
 };
 
+// Custom Hook for Resource Management
 export const useResourceManagement = (
   setYamlValue: Dispatch<SetStateAction<string>>
 ) => {

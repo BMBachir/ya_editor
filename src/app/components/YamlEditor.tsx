@@ -5,6 +5,7 @@ import { yaml } from "@codemirror/lang-yaml";
 import { oneDark } from "@codemirror/theme-one-dark";
 import NavBar from "./NavBar";
 import Stepper from "./Stepper";
+import { parseAllDocuments } from "yaml";
 import { useYamlEditorState } from "./Hooks/useYamlEditorState";
 import { useResourceManagement } from "./Hooks/useResourceManagement";
 import { useSearch } from "./Hooks/useSearch";
@@ -17,6 +18,8 @@ const YamlEditor: React.FC = () => {
   const {
     yamlValue,
     setYamlValue,
+    jsonObjects,
+    setJsonObjects,
     isYamlToJson,
     setIsYamlToJson,
     fileInputRef,
@@ -27,7 +30,6 @@ const YamlEditor: React.FC = () => {
   } = useYamlEditorState();
 
   const {
-    jsonObjects,
     expandedResourceIndex,
     handleAddResource,
     toggleKindVisibility,
@@ -95,7 +97,20 @@ const YamlEditor: React.FC = () => {
                     height="680px"
                     theme={oneDark}
                     extensions={[yaml()]}
-                    onChange={(value) => setYamlValue(value)}
+                    onChange={(value) => {
+                      setYamlValue(value);
+                      try {
+                        const parsedDocuments = parseAllDocuments(value);
+                        const parsedObjects = parsedDocuments.map((doc) => {
+                          const obj = doc.toJSON();
+                          obj.kind = obj.kind || "Unknown";
+                          return obj;
+                        });
+                        setJsonObjects(parsedObjects);
+                      } catch (error) {
+                        console.error("Error parsing YAML:", error);
+                      }
+                    }}
                     className="w-full"
                   />
                   <div className="mt-16 ">

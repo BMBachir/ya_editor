@@ -1,3 +1,4 @@
+"use client";
 import { useState, useRef } from "react";
 import { parseAllDocuments, stringify as yamlStringify } from "yaml";
 import { parse as jsonParse, stringify as jsonStringify } from "json5";
