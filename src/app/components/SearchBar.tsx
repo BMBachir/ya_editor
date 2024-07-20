@@ -93,7 +93,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                   onChange={handleSearchChange}
                   onFocus={() => setShowSuggestions(true)}
                   onBlur={() => setShowSuggestions(false)}
-                  className="text-gray-400 bg-gray-900 w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10"
+                  className="text-gray-400 bg-backgrounColor2 w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10"
                 />
                 {searchTerm && (
                   <div className="absolute inset-y-0 right-2 flex items-center pr-3">
@@ -105,7 +105,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 )}
               </div>
               {filteredSuggestions.length > 0 && (
-                <div className="mt-2 bg-gray-900 rounded-lg shadow-lg w-full">
+                <div className="mt-2 bg-backgrounColor2 rounded-lg shadow-lg w-full">
                   <ul className="max-h-64 overflow-y-auto">
                     {filteredSuggestions.map((suggestion, index) => (
                       <li

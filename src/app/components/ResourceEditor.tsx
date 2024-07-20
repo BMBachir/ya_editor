@@ -57,7 +57,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                 onChange={(e) =>
                   handleKeyChange(index, currentPath, e.target.value)
                 }
-                className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
+                className="input mt-1 block w-full rounded-md  "
               />
             </div>
           </div>
@@ -85,7 +85,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                       Number(e.target.value)
                     )
                   }
-                  className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
+                  className="input mt-1 block w-full rounded-md  "
                 />
               </div>
             ) : (
@@ -97,7 +97,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                   onChange={(e) =>
                     handleInputChange(index, currentPath, e.target.value)
                   }
-                  className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
+                  className="input mt-1 block w-full rounded-md"
                 />
               </div>
             )}

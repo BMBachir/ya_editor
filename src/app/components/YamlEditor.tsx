@@ -48,8 +48,8 @@ const YamlEditor: React.FC = () => {
     handleSuggestionClick,
     handleSearchShow,
     showSuggestions,
-    filteredSuggestions,
     handleClearSearch,
+    filteredSuggestions,
   } = useSearch((resourceType: string) => {
     handleAddResource(resourceType);
   });

@@ -13,7 +13,7 @@ const config: Config = {
       colors: {
         backgroundColor: "#021825",
         backgrounColor2: "#071B27",
-        primaryColor: "#00ADEF",
+        primaryColor: "#00BEFF",
         yellowColor: "#FEB60D",
         purpleColor: "#9771FF",
         irisBlueColor: "#48cae4",
