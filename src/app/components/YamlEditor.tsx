@@ -2,7 +2,9 @@
 import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { yaml } from "@codemirror/lang-yaml";
+import { javascript } from "@codemirror/lang-javascript";
 import { oneDark } from "@codemirror/theme-one-dark";
+import { dracula, draculaInit } from "@uiw/codemirror-theme-dracula";
 import { parseAllDocuments } from "yaml";
 import NavBar from "./NavBar";
 import Stepper from "./Stepper";
@@ -13,6 +15,8 @@ import ResourceEditor from "./ResourceEditor";
 import FileUpload from "./FileUpload";
 import YamlJsonToggle from "./YamlJsonToggle";
 import SearchBar from "./SearchBar";
+import { createTheme } from "@uiw/codemirror-themes";
+import { tags as t } from "@lezer/highlight";
 
 const YamlEditor: React.FC = () => {
   const {
@@ -27,6 +31,7 @@ const YamlEditor: React.FC = () => {
     handleYamlToJson,
     handleJsonToYaml,
     handleClearYaml,
+    handleEditorChange,
   } = useYamlEditorState();
 
   const {
@@ -36,7 +41,7 @@ const YamlEditor: React.FC = () => {
     handleDeleteResource,
     handleInputChange,
     handleKeyChange,
-  } = useResourceManagement(setYamlValue);
+  } = useResourceManagement(setYamlValue, setJsonObjects);
 
   const {
     searchTerm,
@@ -64,34 +69,47 @@ const YamlEditor: React.FC = () => {
     });
   });
 
+  const customDraculaTheme = draculaInit({
+    settings: {
+      caret: "#c6c6c6",
+      fontFamily: "monospace",
+    },
+    styles: [
+      { tag: t.propertyName, color: "#50fa7b" },
+      { tag: t.string, color: "#ffb86c" },
+      { tag: t.number, color: "#bd93f9" },
+      { tag: t.bool, color: "#bd93f9" },
+      { tag: t.null, color: "#bd93f9" },
+      { tag: t.punctuation, color: "#ff5555" },
+      { tag: t.separator, color: "#ff5555" },
+    ],
+  });
+
   return (
     <div className="flex">
       <NavBar />
       <div className="flex flex-col md:flex-row flex-1 ">
         <div className="flex-1 overflow-auto custom-scrollbar">
-          <div className="flex flex-col min-h-screen  bg-backgroundColor text-white">
-            <div className=" mt-16">
-              {" "}
+          <div className="flex flex-col min-h-screen bg-backgroundColor text-white">
+            <div className="mt-16">
               <Stepper />
             </div>
             <div className="flex flex-col md:flex-row flex-1 mt-7">
               {/* Left Column */}
-              <div className="bg-backgroundColor p-6 w-full md:w-1/3 flex flex-col rounded-lg gap-6  overflow-auto">
+              <div className="bg-backgroundColor p-6 w-full md:w-1/3 flex flex-col rounded-lg gap-6 overflow-auto">
                 <div className="flex items-center justify-between mb-4">
-                  <div className=" flex gap-5">
-                    <SearchBar
-                      handleClearSearch={handleClearSearch}
-                      setShowSuggestions={setShowSuggestions}
-                      handleClearYaml={handleClearYaml}
-                      searchTerm={searchTerm}
-                      showSearch={showSearch}
-                      handleSearchChange={handleSearchChange}
-                      handleSearchShow={handleSearchShow}
-                      showSuggestions={showSuggestions}
-                      filteredSuggestions={filteredSuggestions}
-                      handleSuggestionClick={handleSuggestionClick}
-                    />
-                  </div>
+                  <SearchBar
+                    handleClearSearch={handleClearSearch}
+                    setShowSuggestions={setShowSuggestions}
+                    handleClearYaml={handleClearYaml}
+                    searchTerm={searchTerm}
+                    showSearch={showSearch}
+                    handleSearchChange={handleSearchChange}
+                    handleSearchShow={handleSearchShow}
+                    showSuggestions={showSuggestions}
+                    filteredSuggestions={filteredSuggestions}
+                    handleSuggestionClick={handleSuggestionClick}
+                  />
                 </div>
 
                 <div id="jsonInputs" className="flex flex-col gap-4">
@@ -107,48 +125,28 @@ const YamlEditor: React.FC = () => {
               </div>
 
               {/* Right Column */}
-              <div className="flex-1 ml-4 bg-backgrounColor2 p-4 flex flex-col items-center rounded-md ">
+              <div className="flex-1 ml-4 bg-backgrounColor2 p-4 flex flex-col items-center rounded-md">
                 <div className="flex flex-col items-center w-full">
                   <CodeMirror
                     value={yamlValue}
                     height="680px"
-                    theme={oneDark}
+                    theme={customDraculaTheme}
                     extensions={[yaml()]}
-                    onChange={(value) => {
-                      setYamlValue(value);
-                      try {
-                        const parsedDocuments = parseAllDocuments(value);
-                        const parsedObjects = parsedDocuments.map((doc) => {
-                          const obj = doc.toJSON();
-                          if (obj) {
-                            obj.kind = obj.kind || "Unknown";
-                          }
-                          return obj;
-                        });
-                        setJsonObjects(parsedObjects);
-                      } catch (error) {
-                        console.error("Error parsing YAML:", error);
-                      }
-                    }}
+                    onChange={handleEditorChange}
                     className="w-full"
+                    lang="yaml"
                   />
-                  <div className=" ">
-                    <div className="flex items-center justify-center gap-5 mt-6">
-                      <div className="relative ">
-                        <FileUpload
-                          fileInputRef={fileInputRef}
-                          handleFileChange={handleFileChange}
-                        />
-                      </div>
-                      <div className="">
-                        <YamlJsonToggle
-                          isYamlToJson={isYamlToJson}
-                          setIsYamlToJson={setIsYamlToJson}
-                          handleYamlToJson={handleYamlToJson}
-                          handleJsonToYaml={handleJsonToYaml}
-                        />
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-center gap-5 mt-6">
+                    <FileUpload
+                      fileInputRef={fileInputRef}
+                      handleFileChange={handleFileChange}
+                    />
+                    <YamlJsonToggle
+                      isYamlToJson={isYamlToJson}
+                      setIsYamlToJson={setIsYamlToJson}
+                      handleYamlToJson={handleYamlToJson}
+                      handleJsonToYaml={handleJsonToYaml}
+                    />
                   </div>
                 </div>
               </div>

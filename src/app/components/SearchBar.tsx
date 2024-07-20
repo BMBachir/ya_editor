@@ -76,10 +76,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 shadow-lg"
+          className="fixed inset-0 z-50 flex items-center justify-center  bg-black bg-opacity-50 shadow-lg"
           onClick={handleOverlayClick}
         >
-          <div className="flex flex-col gap-6 bg-backgroundColor rounded-lg p-6 relative w-full max-w-md mx-auto">
+          <div
+            className="flex flex-col gap-6 bg-backgroundColor rounded-lg p-6 relative w-full max-w-md mx-auto"
+            onClick={(e) => e.stopPropagation()} // Prevent click events from propagating to the overlay
+          >
             <div className="flex flex-col items-center w-full gap-4">
               <input
                 type="text"
@@ -98,7 +101,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                   />
                 </div>
               )}
-              {showSuggestions && filteredSuggestions.length > 0 && (
+              {filteredSuggestions.length > 0 && (
                 <div className="mt-2 bg-gray-900 rounded-lg shadow-lg w-full">
                   <ul className="max-h-64 overflow-y-auto">
                     {filteredSuggestions.map((suggestion, index) => (

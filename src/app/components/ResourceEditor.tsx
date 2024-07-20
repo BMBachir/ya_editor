@@ -29,6 +29,11 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   handleInputChange,
 }) => {
   const renderInputs = (obj: any, index: number, path = ""): JSX.Element[] => {
+    // Ensure obj is an object and not null
+    if (typeof obj !== "object" || obj === null) {
+      return [];
+    }
+
     return Object.keys(obj).map((key) => {
       const value = obj[key];
       const currentPath = path ? `${path}.${key}` : key;
@@ -111,7 +116,8 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
               className="text-lg font-medium mb-2 hover:text-hoverColor"
               onClick={() => toggleKindVisibility(index)}
             >
-              Kind: {obj.kind || "Unknown"}
+              {/* Ensure obj is defined and not null */}
+              Kind: {obj && obj.kind ? obj.kind : "Unknown"}
             </h3>
             <div className="flex items-center justify-center gap-5">
               <button
