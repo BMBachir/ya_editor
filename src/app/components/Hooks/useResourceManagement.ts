@@ -1,24 +1,13 @@
 "use client";
-import {
-  useState,
-  Dispatch,
-  SetStateAction,
-  ChangeEvent,
-  RefObject,
-} from "react";
+import { useState, Dispatch, SetStateAction } from "react";
 import {
   updateNestedObject,
   resolveRef,
   getDefaultForType,
   getLastWord,
-  isNumberKey,
 } from "../UtilityFunctions/utils";
 import { k8sDefinitions } from "../data/definitions";
 import { stringify as yamlStringify, parseAllDocuments } from "yaml";
-import { parse as jsonParse, stringify as jsonStringify } from "json5";
-import { FaFileUpload } from "react-icons/fa";
-import { MdDeleteOutline } from "react-icons/md";
-import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 
 type ResourceProperties = {
   [key: string]: {
@@ -53,20 +42,23 @@ export const useResourceManagement = (
       return;
     }
 
-    const resource = k8sDefinitions[
-      resourceType as keyof typeof k8sDefinitions
-    ] as KubernetesResource;
-    if (!resource.properties) {
+    const resource =
+      k8sDefinitions[resourceType as keyof typeof k8sDefinitions];
+
+    if (!("properties" in resource)) {
       console.error(`No properties found for resource type: ${resourceType}`);
       return;
     }
 
-    const properties = resource.properties;
+    const properties = resource.properties as {
+      [key: string]: { type?: string; items?: any; $ref?: string };
+    };
+
     const newResource = Object.keys(properties).reduce((acc, key) => {
       const property = properties[key];
       if (key === "kind") {
         acc[key] = getLastWord(resourceType);
-      } else if (property.items?.$ref) {
+      } else if (property.items && property.items.$ref) {
         const refValue = property.items.$ref.replace("#/definitions/", "");
         acc[key] = [resolveRef(refValue)];
       } else if (property.$ref) {
@@ -77,16 +69,19 @@ export const useResourceManagement = (
         acc[key] = getDefaultForType(propertyType || "");
       }
       return acc;
-    }, {} as JsonObject);
+    }, {} as { [key: string]: any });
 
-    setJsonObjects((prev) => {
-      const updated = [...prev, newResource];
-      const updatedYaml = updated
-        .map((item) => yamlStringify(item))
-        .join("---\n");
+    setJsonObjects((prev) => [...prev, newResource]);
+
+    try {
+      const updatedYaml = [
+        ...jsonObjects.map((obj) => yamlStringify(obj)),
+        yamlStringify(newResource),
+      ].join("---\n");
       setYamlValue(updatedYaml);
-      return updated;
-    });
+    } catch (error) {
+      console.error("Error updating YAML value:", error);
+    }
   };
 
   const toggleKindVisibility = (index: number) => {
@@ -98,12 +93,15 @@ export const useResourceManagement = (
   const handleDeleteResource = (index: number) => {
     setJsonObjects((prev) => {
       const updated = [...prev];
-      updated.splice(index, 1);
-      const updatedYaml = updated
-        .map((item) => yamlStringify(item))
-        .join("---\n");
+      updated.splice(index, 1); // Remove the resource at the specified index
+
+      // Convert the updated JSON objects to YAML and update the yamlValue state
+      const updatedYaml = updated.length
+        ? updated.map((item) => yamlStringify(item)).join("\n---\n")
+        : "";
       setYamlValue(updatedYaml);
-      return updated;
+
+      return updated; // Update the jsonObjects state
     });
   };
 

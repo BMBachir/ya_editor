@@ -19,21 +19,13 @@ export const isNumberKey = (path: string): boolean => {
 };
 
 // Update nested objects based on a given path and new value
-export const updateNestedObject = (
-  obj: any,
-  path: string,
-  newValue: any
-): any => {
+export const updateNestedObject = (obj: any, path: string, newValue: any) => {
   const keys = path.split(".");
   let current = obj;
   for (let i = 0; i < keys.length - 1; i++) {
-    if (!current[keys[i]]) {
-      current[keys[i]] = {};
-    }
-    current = current[keys[i]];
+    current = current[keys[i]] = current[keys[i]] || {};
   }
   current[keys[keys.length - 1]] = newValue;
-  return obj;
 };
 
 // Get the last word from a dot-separated string
@@ -43,13 +35,14 @@ export const getLastWord = (str: string): string => {
 };
 
 // Resolve $ref recursively to get nested properties
+// Example improved circular reference handling
 export const resolveRef = (
   refValue: string,
   visited = new Set<string>()
 ): any => {
   if (visited.has(refValue)) {
     console.warn(`Circular reference detected: ${refValue}`);
-    return {};
+    return {}; // Or handle according to your needs
   }
 
   visited.add(refValue);

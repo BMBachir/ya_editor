@@ -43,10 +43,12 @@ export const useSearch = (
   const handleSearchShow = () => {
     setShowSearch(!showSearch);
   };
+
   const handleClearSearch = () => {
     setSearchTerm("");
     setShowSuggestions(false);
   };
+
   return {
     searchTerm,
     showSearch,
