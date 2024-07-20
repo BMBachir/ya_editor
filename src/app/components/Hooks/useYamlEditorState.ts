@@ -62,7 +62,16 @@ export const useYamlEditorState = () => {
     setYamlValue("");
     setJsonObjects([]);
   };
-
+  const handleEditorChange = (newValue: string) => {
+    setYamlValue(newValue);
+    try {
+      const parsedDocuments = parseAllDocuments(newValue);
+      const parsedObjects = parsedDocuments.map((doc) => doc.toJSON());
+      setJsonObjects(parsedObjects);
+    } catch (error) {
+      console.error("Error parsing YAML:", error);
+    }
+  };
   return {
     yamlValue,
     setYamlValue,
@@ -75,5 +84,6 @@ export const useYamlEditorState = () => {
     handleYamlToJson,
     handleJsonToYaml,
     handleClearYaml,
+    handleEditorChange,
   };
 };

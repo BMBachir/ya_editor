@@ -7,7 +7,7 @@ import {
   getLastWord,
 } from "../UtilityFunctions/utils";
 import { k8sDefinitions } from "../data/definitions";
-import { stringify as yamlStringify, parseAllDocuments } from "yaml";
+import { stringify as yamlStringify } from "yaml";
 
 type ResourceProperties = {
   [key: string]: {
@@ -28,13 +28,13 @@ type JsonObject = {
 };
 
 // Custom Hook for Resource Management
-export const useResourceManagement = (
-  setYamlValue: Dispatch<SetStateAction<string>>
-) => {
+export function useResourceManagement(
+  setYamlValue: React.Dispatch<React.SetStateAction<string>>,
+  setJsonObjects: React.Dispatch<React.SetStateAction<JsonObject[]>>
+) {
   const [expandedResourceIndex, setExpandedResourceIndex] = useState<
     number | null
   >(null);
-  const [jsonObjects, setJsonObjects] = useState<JsonObject[]>([]);
 
   const handleAddResource = (resourceType: string) => {
     if (!(resourceType in k8sDefinitions)) {
@@ -71,17 +71,11 @@ export const useResourceManagement = (
       return acc;
     }, {} as { [key: string]: any });
 
-    setJsonObjects((prev) => [...prev, newResource]);
-
-    try {
-      const updatedYaml = [
-        ...jsonObjects.map((obj) => yamlStringify(obj)),
-        yamlStringify(newResource),
-      ].join("---\n");
-      setYamlValue(updatedYaml);
-    } catch (error) {
-      console.error("Error updating YAML value:", error);
-    }
+    setJsonObjects((prev) => {
+      const updated = [...prev, newResource];
+      setYamlValue(yamlStringify(updated));
+      return updated;
+    });
   };
 
   const toggleKindVisibility = (index: number) => {
@@ -94,14 +88,8 @@ export const useResourceManagement = (
     setJsonObjects((prev) => {
       const updated = [...prev];
       updated.splice(index, 1); // Remove the resource at the specified index
-
-      // Convert the updated JSON objects to YAML and update the yamlValue state
-      const updatedYaml = updated.length
-        ? updated.map((item) => yamlStringify(item)).join("\n---\n")
-        : "";
-      setYamlValue(updatedYaml);
-
-      return updated; // Update the jsonObjects state
+      setYamlValue(yamlStringify(updated));
+      return updated;
     });
   };
 
@@ -110,10 +98,7 @@ export const useResourceManagement = (
       const updated = [...prev];
       const nestedPath = `${path}.newField`;
       updateNestedObject(updated[index], nestedPath, "");
-      const updatedYaml = updated
-        .map((item) => yamlStringify(item))
-        .join("---\n");
-      setYamlValue(updatedYaml);
+      setYamlValue(yamlStringify(updated));
       return updated;
     });
   };
@@ -169,10 +154,7 @@ export const useResourceManagement = (
         current[newKey] = value;
       }
 
-      const updatedYaml = updated
-        .map((item) => yamlStringify(item))
-        .join("---\n");
-      setYamlValue(updatedYaml);
+      setYamlValue(yamlStringify(updated));
 
       return updated;
     });
@@ -182,23 +164,17 @@ export const useResourceManagement = (
     setJsonObjects((prev) => {
       const updated = [...prev];
       updateNestedObject(updated[index], path, newValue);
-      const updatedYaml = updated
-        .map((item) => yamlStringify(item))
-        .join("---\n");
-      setYamlValue(updatedYaml);
+      setYamlValue(yamlStringify(updated));
       return updated;
     });
   };
 
   return {
-    jsonObjects,
     expandedResourceIndex,
-    setExpandedResourceIndex,
     handleAddResource,
     toggleKindVisibility,
     handleDeleteResource,
     handleInputChange,
-    handleAddNestedField,
     handleKeyChange,
   };
-};
+}
