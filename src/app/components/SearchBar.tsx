@@ -76,31 +76,37 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center  bg-black bg-opacity-50 shadow-lg"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
           onClick={handleOverlayClick}
         >
           <div
-            className="flex flex-col gap-6 bg-backgroundColor rounded-lg p-6 relative w-full max-w-md mx-auto"
+            className="bg-backgroundColor rounded-lg p-6 relative"
+            style={{
+              width: "400px",
+              height: "400px",
+            }}
             onClick={(e) => e.stopPropagation()} // Prevent click events from propagating to the overlay
           >
-            <div className="flex flex-col items-center w-full gap-4">
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setShowSuggestions(false)}
-                className="text-gray-400 bg-gray-900 w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10"
-              />
-              {searchTerm && (
-                <div className="absolute inset-y-0 right-10 flex items-center pr-3">
-                  <CiCircleRemove
-                    className="h-5 w-5 text-primaryColor cursor-pointer"
-                    onClick={handleClearSearch}
-                  />
-                </div>
-              )}
+            <div className="flex flex-col items-center w-full h-full gap-4 relative">
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setShowSuggestions(false)}
+                  className="text-gray-400 bg-gray-900 w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10"
+                />
+                {searchTerm && (
+                  <div className="absolute inset-y-0 right-2 flex items-center pr-3">
+                    <CiCircleRemove
+                      className="h-5 w-5 text-primaryColor cursor-pointer"
+                      onClick={handleClearSearch}
+                    />
+                  </div>
+                )}
+              </div>
               {filteredSuggestions.length > 0 && (
                 <div className="mt-2 bg-gray-900 rounded-lg shadow-lg w-full">
                   <ul className="max-h-64 overflow-y-auto">
