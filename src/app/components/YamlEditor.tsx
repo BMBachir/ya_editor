@@ -2,8 +2,6 @@
 import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { yaml } from "@codemirror/lang-yaml";
-import { javascript } from "@codemirror/lang-javascript";
-import { oneDark } from "@codemirror/theme-one-dark";
 import { dracula, draculaInit } from "@uiw/codemirror-theme-dracula";
 import { parseAllDocuments } from "yaml";
 import NavBar from "./NavBar";
@@ -69,22 +67,6 @@ const YamlEditor: React.FC = () => {
     });
   });
 
-  const customDraculaTheme = draculaInit({
-    settings: {
-      caret: "#c6c6c6",
-      fontFamily: "monospace",
-    },
-    styles: [
-      { tag: t.propertyName, color: "#50fa7b" },
-      { tag: t.string, color: "#ffb86c" },
-      { tag: t.number, color: "#bd93f9" },
-      { tag: t.bool, color: "#bd93f9" },
-      { tag: t.null, color: "#bd93f9" },
-      { tag: t.punctuation, color: "#ff5555" },
-      { tag: t.separator, color: "#ff5555" },
-    ],
-  });
-
   return (
     <div className="flex">
       <NavBar />
@@ -130,7 +112,16 @@ const YamlEditor: React.FC = () => {
                   <CodeMirror
                     value={yamlValue}
                     height="680px"
-                    theme={customDraculaTheme}
+                    theme={draculaInit({
+                      settings: {
+                        gutterBackground: "#05141C",
+                        background: "#05141C",
+                        fontSize: "15px",
+                        caret: "#c6c6c6",
+                        fontFamily: "monospace",
+                      },
+                      styles: [{ tag: t.keyword, color: "#FFAB70" }],
+                    })}
                     extensions={[yaml()]}
                     onChange={handleEditorChange}
                     className="w-full"
