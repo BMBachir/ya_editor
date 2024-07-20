@@ -2,7 +2,7 @@
 import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { yaml } from "@codemirror/lang-yaml";
-import { dracula, draculaInit } from "@uiw/codemirror-theme-dracula";
+import { draculaInit } from "@uiw/codemirror-theme-dracula";
 import { parseAllDocuments } from "yaml";
 import NavBar from "./NavBar";
 import Stepper from "./Stepper";
@@ -13,7 +13,6 @@ import ResourceEditor from "./ResourceEditor";
 import FileUpload from "./FileUpload";
 import YamlJsonToggle from "./YamlJsonToggle";
 import SearchBar from "./SearchBar";
-import { createTheme } from "@uiw/codemirror-themes";
 import { tags as t } from "@lezer/highlight";
 
 const YamlEditor: React.FC = () => {
@@ -53,18 +52,6 @@ const YamlEditor: React.FC = () => {
     handleClearSearch,
   } = useSearch((resourceType: string) => {
     handleAddResource(resourceType);
-    setYamlValue((prevYaml) => {
-      const parsedDocuments = parseAllDocuments(prevYaml);
-      const parsedObjects = parsedDocuments.map((doc) => {
-        const obj = doc.toJSON();
-        if (obj) {
-          obj.kind = obj.kind || "Unknown";
-        }
-        return obj;
-      });
-      setJsonObjects(parsedObjects);
-      return prevYaml;
-    });
   });
 
   return (

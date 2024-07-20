@@ -81,11 +81,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
         >
           <div
             className="bg-backgroundColor rounded-lg p-6 relative"
-            style={{
-              width: "400px",
-              height: "400px",
-            }}
-            onClick={(e) => e.stopPropagation()} // Prevent click events from propagating to the overlay
+            style={{ width: "400px", height: "400px" }}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col items-center w-full h-full gap-4 relative">
               <div className="relative w-full">
