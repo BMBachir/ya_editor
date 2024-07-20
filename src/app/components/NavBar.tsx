@@ -7,7 +7,7 @@ import { SiCkeditor4 } from "react-icons/si";
 import { LuArrowLeftToLine } from "react-icons/lu";
 import { LuArrowRightFromLine } from "react-icons/lu";
 const NavBar = () => {
-  const [isNavVisible, setIsNavVisible] = useState(true);
+  const [isNavVisible, setIsNavVisible] = useState(false);
 
   const toggleNavVisibility = () => {
     setIsNavVisible(!isNavVisible);

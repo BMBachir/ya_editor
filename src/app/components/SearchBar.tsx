@@ -1,5 +1,5 @@
 "use client";
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useState } from "react";
 import { IoAdd, IoRemove } from "react-icons/io5";
 import { MdClearAll } from "react-icons/md";
 import { CiCircleRemove } from "react-icons/ci";
@@ -30,35 +30,57 @@ const SearchBar: React.FC<SearchBarProps> = ({
   handleClearYaml,
   handleClearSearch,
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+    handleSearchShow();
+  };
+
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      toggleModal();
+    }
+  };
+
   return (
     <>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold ">Edit from inputs</h2>
-        <div className="flex items-center gap-6">
-          <button
-            className="text-red-500 hover:text-red-600 font-semibold rounded-md shadow-sm"
-            onClick={handleClearYaml}
-          >
-            <MdClearAll className="h-6 w-6" />
-          </button>
-          <button
-            className={`text-${showSearch ? "red" : "green"}-500 hover:text-${
-              showSearch ? "red" : "green"
-            }-600 font-semibold rounded-md shadow-sm`}
-            onClick={handleSearchShow}
-          >
-            {showSearch ? (
-              <IoRemove className="h-6 w-6" />
-            ) : (
-              <IoAdd className="h-6 w-6" />
-            )}
-          </button>
+      <div className="flex items-center justify-between gap-80 mb-3">
+        <div className="flex">
+          <h2 className="text-xl font-semibold">Edit from inputs</h2>
+        </div>
+
+        <div className="flex-1">
+          <div className="flex items-center gap-6">
+            <button
+              className="text-red-500 hover:text-red-600 font-semibold rounded-md shadow-sm"
+              onClick={handleClearYaml}
+            >
+              <MdClearAll className="h-6 w-6" />
+            </button>
+            <button
+              className={`text-${showSearch ? "red" : "green"}-500 hover:text-${
+                showSearch ? "red" : "green"
+              }-600 font-semibold rounded-md shadow-sm`}
+              onClick={toggleModal}
+            >
+              {showSearch ? (
+                <IoRemove className="h-6 w-6" />
+              ) : (
+                <IoAdd className="h-6 w-6" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
-      {showSearch && (
-        <div className="flex items-center justify-center w-full flex-wrap md:flex-nowrap gap-4">
-          <div className="w-full max-w-md top-4">
-            <div className="relative">
+
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 shadow-lg"
+          onClick={handleOverlayClick}
+        >
+          <div className="flex flex-col gap-6 bg-backgroundColor rounded-lg p-6 relative w-full max-w-md mx-auto">
+            <div className="flex flex-col items-center w-full gap-4">
               <input
                 type="text"
                 placeholder="Search..."
@@ -68,31 +90,30 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 onBlur={() => setShowSuggestions(false)}
                 className="text-gray-400 bg-gray-900 w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10"
               />
-
               {searchTerm && (
-                <div className="absolute inset-y-0 right-1 flex items-center pr-3">
+                <div className="absolute inset-y-0 right-10 flex items-center pr-3">
                   <CiCircleRemove
                     className="h-5 w-5 text-primaryColor cursor-pointer"
                     onClick={handleClearSearch}
                   />
                 </div>
               )}
+              {showSuggestions && filteredSuggestions.length > 0 && (
+                <div className="mt-2 bg-gray-900 rounded-lg shadow-lg w-full">
+                  <ul className="max-h-64 overflow-y-auto">
+                    {filteredSuggestions.map((suggestion, index) => (
+                      <li
+                        key={index}
+                        className="cursor-pointer px-4 py-3 text-sm hover:bg-gray-700"
+                        onMouseDown={() => handleSuggestionClick(suggestion)}
+                      >
+                        <span>{getLastWord(suggestion)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
-            {showSuggestions && filteredSuggestions.length > 0 && (
-              <div className="mt-2 bg-gray-900 rounded-lg shadow-lg">
-                <ul className="max-h-64 overflow-y-auto">
-                  {filteredSuggestions.map((suggestion, index) => (
-                    <li
-                      key={index}
-                      className="cursor-pointer px-4 py-3 text-sm hover:bg-gray-700"
-                      onMouseDown={() => handleSuggestionClick(suggestion)}
-                    >
-                      <span>{getLastWord(suggestion)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
         </div>
       )}

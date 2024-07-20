@@ -3,9 +3,9 @@ import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { yaml } from "@codemirror/lang-yaml";
 import { oneDark } from "@codemirror/theme-one-dark";
+import { parseAllDocuments } from "yaml";
 import NavBar from "./NavBar";
 import Stepper from "./Stepper";
-import { parseAllDocuments } from "yaml";
 import { useYamlEditorState } from "./Hooks/useYamlEditorState";
 import { useResourceManagement } from "./Hooks/useResourceManagement";
 import { useSearch } from "./Hooks/useSearch";
@@ -48,20 +48,37 @@ const YamlEditor: React.FC = () => {
     showSuggestions,
     filteredSuggestions,
     handleClearSearch,
-  } = useSearch(handleAddResource);
+  } = useSearch((resourceType: string) => {
+    handleAddResource(resourceType);
+    setYamlValue((prevYaml) => {
+      const parsedDocuments = parseAllDocuments(prevYaml);
+      const parsedObjects = parsedDocuments.map((doc) => {
+        const obj = doc.toJSON();
+        if (obj) {
+          obj.kind = obj.kind || "Unknown";
+        }
+        return obj;
+      });
+      setJsonObjects(parsedObjects);
+      return prevYaml;
+    });
+  });
 
   return (
     <div className="flex">
       <NavBar />
       <div className="flex flex-col md:flex-row flex-1 ">
         <div className="flex-1 overflow-auto custom-scrollbar">
-          <div className="flex flex-col min-h-screen bg-backgroundColor text-white">
-            <Stepper />
-            <div className="flex flex-col md:flex-row flex-1">
+          <div className="flex flex-col min-h-screen  bg-backgroundColor text-white">
+            <div className=" mt-16">
+              {" "}
+              <Stepper />
+            </div>
+            <div className="flex flex-col md:flex-row flex-1 mt-7">
               {/* Left Column */}
-              <div className="bg-gray-800 p-6 w-full md:w-1/3 flex flex-col rounded-lg gap-6 h-screen overflow-auto">
+              <div className="bg-backgroundColor p-6 w-full md:w-1/3 flex flex-col rounded-lg gap-6  overflow-auto">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex gap-5">
+                  <div className=" flex gap-5">
                     <SearchBar
                       handleClearSearch={handleClearSearch}
                       setShowSuggestions={setShowSuggestions}
@@ -90,7 +107,7 @@ const YamlEditor: React.FC = () => {
               </div>
 
               {/* Right Column */}
-              <div className="flex-1 ml-4 bg-gray-800 p-4 flex flex-col items-center h-screen overflow-auto">
+              <div className="flex-1 ml-4 bg-backgrounColor2 p-4 flex flex-col items-center rounded-md ">
                 <div className="flex flex-col items-center w-full">
                   <CodeMirror
                     value={yamlValue}
@@ -103,7 +120,9 @@ const YamlEditor: React.FC = () => {
                         const parsedDocuments = parseAllDocuments(value);
                         const parsedObjects = parsedDocuments.map((doc) => {
                           const obj = doc.toJSON();
-                          obj.kind = obj.kind || "Unknown";
+                          if (obj) {
+                            obj.kind = obj.kind || "Unknown";
+                          }
                           return obj;
                         });
                         setJsonObjects(parsedObjects);
@@ -113,15 +132,15 @@ const YamlEditor: React.FC = () => {
                     }}
                     className="w-full"
                   />
-                  <div className="mt-16 ">
-                    <div className="flex items-center justify-center gap-5">
-                      <div className="relative w-[130px] h-[50px]">
+                  <div className=" ">
+                    <div className="flex items-center justify-center gap-5 mt-6">
+                      <div className="relative ">
                         <FileUpload
                           fileInputRef={fileInputRef}
                           handleFileChange={handleFileChange}
                         />
                       </div>
-                      <div className="mb-12">
+                      <div className="">
                         <YamlJsonToggle
                           isYamlToJson={isYamlToJson}
                           setIsYamlToJson={setIsYamlToJson}

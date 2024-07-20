@@ -11,7 +11,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   handleFileChange,
 }) => {
   return (
-    <div className="relative w-[130px] h-[50px]">
+    <div className="relative w-[130px] ">
       <input
         type="file"
         ref={fileInputRef}

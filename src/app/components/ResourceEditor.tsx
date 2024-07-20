@@ -77,7 +77,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                     handleInputChange(
                       index,
                       currentPath,
-                      e.target.value === "" ? null : Number(e.target.value)
+                      Number(e.target.value)
                     )
                   }
                   className="input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-irisBlueColor focus:ring-irisBlueColor sm:text-sm"
@@ -103,35 +103,37 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   };
 
   return (
-    <div id="jsonInputs" className="flex flex-col gap-4 outline-none">
+    <div id="jsonInputs" className="flex flex-col gap-4">
       {jsonObjects.map((obj, index) => (
-        <div
-          key={index}
-          className="mb-4 border p-4 rounded-md bg-backgrounColor2 outline-none"
-        >
-          <div className="flex items-center justify-between">
-            <button
+        <div key={index} className="bg-backgrounColor2 p-4 rounded-lg">
+          <div className="flex items-center justify-between cursor-pointer">
+            <h3
+              className="text-lg font-medium mb-2 hover:text-hoverColor"
               onClick={() => toggleKindVisibility(index)}
-              className="text-white hover:text-hoverColor transition-colors"
             >
-              {expandedResourceIndex === index ? (
-                <IoIosArrowDown className="h-5 w-5" />
-              ) : (
-                <IoIosArrowForward className="h-5 w-5" />
-              )}
-              <h3 className="text-lg font-medium mb-2">
-                Kind: {obj.kind || "Unknown"}
-              </h3>
-            </button>
-            <button
-              onClick={() => handleDeleteResource(index)}
-              className="text-red-500 hover:text-red-600 transition-colors"
-            >
-              <MdDeleteOutline className="h-5 w-5" />
-            </button>
+              Kind: {obj.kind || "Unknown"}
+            </h3>
+            <div className="flex items-center justify-center gap-5">
+              <button
+                className="text-red-400 hover:text-red-500"
+                onClick={() => handleDeleteResource(index)}
+              >
+                <MdDeleteOutline className="h-5 w-5" />
+              </button>
+              <span
+                className="hover:text-hoverColor"
+                onClick={() => toggleKindVisibility(index)}
+              >
+                {expandedResourceIndex === index ? (
+                  <IoIosArrowDown className="h-5 w-5" />
+                ) : (
+                  <IoIosArrowForward className="h-5 w-5" />
+                )}
+              </span>
+            </div>
           </div>
           {expandedResourceIndex === index && (
-            <div className="mt-2">{renderInputs(obj, index)}</div>
+            <div className="rounded-md">{renderInputs(obj, index)}</div>
           )}
         </div>
       ))}
