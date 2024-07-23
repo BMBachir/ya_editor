@@ -48,7 +48,7 @@ body {
   }
 
   .input {
-    @apply text-gray-400 bg-backgroundColor w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10 focus:border-transparent;
+    @apply text-gray-400 border border-opacity-30 border-cyan-900 bg-backgroundColor w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10 focus:border-transparent;
   }
 
   ::-webkit-scrollbar {

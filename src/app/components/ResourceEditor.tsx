@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 import { isNumberKey } from "./UtilityFunctions/utils";
+import { defaultSchema, specificSchemas } from "./data/schemas";
+import SimpleFields from "./SimpleFields";
 
 interface ResourceEditorProps {
   jsonObjects: any[];
@@ -78,7 +80,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                 <input
                   id={`${inputKey}-value`}
                   type="number"
-                  value={value === null ? "" : value}
+                  value={value === null ? "value" : value}
                   onChange={(e) =>
                     handleInputChange(
                       index,
@@ -94,7 +96,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                 <input
                   id={`${inputKey}-value`}
                   type="text"
-                  value={value === null ? "" : value}
+                  value={value === null ? "value" : value}
                   onChange={(e) =>
                     handleInputChange(index, currentPath, e.target.value)
                   }
@@ -145,11 +147,11 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
             </div>
           </div>
           {expandedResourceIndex === index && (
-            <div className="rounded-md overflow-auto h-screen">
-              <div className="flex items-center justify-start gap-4 mb-4 transition-all duration-900 ">
-                <div className="bg-[#021825] py-2 rounded-lg   ">
+            <div className="rounded-md overflow-auto h-screen  transition-all duration-300 ease-in-out">
+              <div className="flex items-center justify-start gap-4 mb-4 transition-all duration-100 ease-in-out">
+                <div className="bg-[#021825] py-2 rounded-lg">
                   <button
-                    className={`ml-2 py-1 px-3 rounded-lg ${
+                    className={`ml-2 py-1 px-3 rounded-lg transition-colors duration-300 ease-in-out ${
                       activeTab[index] === "Simple"
                         ? "bg-[#123551] text-[#02B2EF]"
                         : " text-gray-300"
@@ -161,7 +163,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                     Simple
                   </button>
                   <button
-                    className={`mr-2 py-1 px-3 rounded-lg  ${
+                    className={`mr-2 py-1 px-3 rounded-lg transition-colors duration-300 ease-in-out ${
                       activeTab[index] === "Advanced"
                         ? "bg-[#123551] text-[#02B2EF]"
                         : " text-gray-300"
@@ -175,10 +177,20 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                 </div>
               </div>
               {activeTab[index] === "Simple" && (
-                <div>{/* Render Simple inputs here */}</div>
+                <div className="transition-all duration-100 ease-in-out opacity-100">
+                  <SimpleFields
+                    schema={specificSchemas[obj.kind] || defaultSchema}
+                    values={obj}
+                    handleInputChange={(path, value) =>
+                      handleInputChange(index, path, value)
+                    }
+                  />
+                </div>
               )}
               {activeTab[index] === "Advanced" && (
-                <div>{renderInputs(obj, index)}</div>
+                <div className="transition-all duration-100 ease-in-out opacity-100">
+                  {renderInputs(obj, index)}
+                </div>
               )}
             </div>
           )}
