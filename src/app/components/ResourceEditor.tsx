@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 import { isNumberKey } from "./UtilityFunctions/utils";
@@ -28,8 +28,9 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   handleKeyChange,
   handleInputChange,
 }) => {
+  const [activeTab, setActiveTab] = useState<{ [key: number]: string }>({});
+
   const renderInputs = (obj: any, index: number, path = ""): JSX.Element[] => {
-    // Ensure obj is an object and not null
     if (typeof obj !== "object" || obj === null) {
       return [];
     }
@@ -57,7 +58,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                 onChange={(e) =>
                   handleKeyChange(index, currentPath, e.target.value)
                 }
-                className="input mt-1 block w-full rounded-md  "
+                className="input mt-1 block w-full rounded-md"
               />
             </div>
           </div>
@@ -77,7 +78,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                 <input
                   id={`${inputKey}-value`}
                   type="number"
-                  value={value === null ? "" : value} // Ensure value is not null
+                  value={value === null ? "" : value}
                   onChange={(e) =>
                     handleInputChange(
                       index,
@@ -85,7 +86,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                       Number(e.target.value)
                     )
                   }
-                  className="input mt-1 block w-full rounded-md  "
+                  className="input mt-1 block w-full rounded-md"
                 />
               </div>
             ) : (
@@ -93,7 +94,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                 <input
                   id={`${inputKey}-value`}
                   type="text"
-                  value={value === null ? "" : value} // Ensure value is not null
+                  value={value === null ? "" : value}
                   onChange={(e) =>
                     handleInputChange(index, currentPath, e.target.value)
                   }
@@ -108,15 +109,20 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   };
 
   return (
-    <div id="jsonInputs" className="flex flex-col gap-4">
+    <div
+      id="jsonInputs"
+      className="flex flex-col gap-4 overflow-auto h-[650px]"
+    >
       {jsonObjects.map((obj, index) => (
-        <div key={index} className="bg-backgrounColor2 p-4 rounded-lg">
+        <div
+          key={index}
+          className="bg-backgrounColor2 p-4 rounded-lg hover:shadow-md hover:shadow-cyan-950"
+        >
           <div className="flex items-center justify-between cursor-pointer">
             <h3
               className="text-lg font-medium mb-2 hover:text-hoverColor"
               onClick={() => toggleKindVisibility(index)}
             >
-              {/* Ensure obj is defined and not null */}
               Kind: {obj && obj.kind ? obj.kind : "Unknown"}
             </h3>
             <div className="flex items-center justify-center gap-5">
@@ -139,7 +145,42 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
             </div>
           </div>
           {expandedResourceIndex === index && (
-            <div className="rounded-md">{renderInputs(obj, index)}</div>
+            <div className="rounded-md overflow-auto h-screen">
+              <div className="flex items-center justify-start gap-4 mb-4 transition-all duration-900 ">
+                <div className="bg-[#021825] py-2 rounded-lg   ">
+                  <button
+                    className={`ml-2 py-1 px-3 rounded-lg ${
+                      activeTab[index] === "Simple"
+                        ? "bg-[#123551] text-[#02B2EF]"
+                        : " text-gray-300"
+                    }`}
+                    onClick={() =>
+                      setActiveTab((prev) => ({ ...prev, [index]: "Simple" }))
+                    }
+                  >
+                    Simple
+                  </button>
+                  <button
+                    className={`mr-2 py-1 px-3 rounded-lg  ${
+                      activeTab[index] === "Advanced"
+                        ? "bg-[#123551] text-[#02B2EF]"
+                        : " text-gray-300"
+                    }`}
+                    onClick={() =>
+                      setActiveTab((prev) => ({ ...prev, [index]: "Advanced" }))
+                    }
+                  >
+                    Advanced
+                  </button>
+                </div>
+              </div>
+              {activeTab[index] === "Simple" && (
+                <div>{/* Render Simple inputs here */}</div>
+              )}
+              {activeTab[index] === "Advanced" && (
+                <div>{renderInputs(obj, index)}</div>
+              )}
+            </div>
           )}
         </div>
       ))}
