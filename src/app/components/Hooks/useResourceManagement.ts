@@ -1,5 +1,5 @@
 "use client";
-import { useState, Dispatch, SetStateAction } from "react";
+import { useState } from "react";
 import {
   updateNestedObject,
   resolveRef,
@@ -8,7 +8,8 @@ import {
 } from "../UtilityFunctions/utils";
 import { k8sDefinitions } from "../data/definitions";
 import { stringify as yamlStringify } from "yaml";
-
+import { defaultSchema, specificSchemas } from "../data/schemas";
+import yaml from "js-yaml";
 type ResourceProperties = {
   [key: string]: {
     type?: string;
@@ -35,6 +36,10 @@ export function useResourceManagement(
   const [expandedResourceIndex, setExpandedResourceIndex] = useState<
     number | null
   >(null);
+
+  {
+    /* Handel Add Resource */
+  }
 
   const handleAddResource = (resourceType: string) => {
     if (!(resourceType in k8sDefinitions)) {
@@ -68,16 +73,26 @@ export function useResourceManagement(
         const propertyType = property.type;
         acc[key] = getDefaultForType(propertyType || "");
       }
+
       return acc;
     }, {} as { [key: string]: any });
 
+    // Replace metadata and spec with specificSchemas if they exist
+    if (specificSchemas[resourceType]) {
+      const specificSchema = specificSchemas[resourceType];
+      if (specificSchema.metadata) {
+        newResource.metadata = specificSchema.metadata;
+      }
+      if (specificSchema.spec) {
+        newResource.spec = specificSchema.spec;
+      }
+    }
     setJsonObjects((prev) => {
       const updated = [...prev, newResource];
-      setYamlValue(yamlStringify(updated));
+      setYamlValue(yaml.dump(updated)); // Converting JSON to YAML
       return updated;
     });
   };
-
   const toggleKindVisibility = (index: number) => {
     setExpandedResourceIndex((prevIndex) =>
       prevIndex === index ? null : index
