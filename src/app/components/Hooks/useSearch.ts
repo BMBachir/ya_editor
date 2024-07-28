@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { simpleSchemas } from "../data/schemas";
-import { getLastWord } from "../UtilityFunctions/utils";
 
 export const useSearch = (
   handleAddResource: (resourceType: string) => void

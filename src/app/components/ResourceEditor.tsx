@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 import { isNumberKey } from "./UtilityFunctions/utils";
-
 import SimpleFields from "./SimpleFields";
 
 interface ResourceEditorProps {
@@ -31,6 +30,17 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   handleInputChange,
 }) => {
   const [activeTab, setActiveTab] = useState<{ [key: number]: string }>({});
+  const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (path: string) => {
+    const newExpandedPaths = new Set(expandedPaths);
+    if (newExpandedPaths.has(path)) {
+      newExpandedPaths.delete(path);
+    } else {
+      newExpandedPaths.add(path);
+    }
+    setExpandedPaths(newExpandedPaths);
+  };
 
   const renderInputs = (obj: any, index: number, path = ""): JSX.Element[] => {
     if (typeof obj !== "object" || obj === null) {
@@ -42,72 +52,68 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
       const currentPath = path ? `${path}.${key}` : key;
       const inputKey = `${index}-${currentPath}`;
       const isNumber = isNumberKey(currentPath);
+      const isObject = typeof value === "object" && value !== null;
+      const isExpanded = expandedPaths.has(currentPath);
 
       return (
-        <div key={inputKey} className="mb-2 flex-1">
-          <div>
+        <div key={inputKey} className="mb-2 flex flex-col">
+          <div className="flex items-center justify-between gap-5 border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full mt-8">
             <label
-              htmlFor={`${inputKey}-key`}
-              className="block text-sm font-medium text-white mt-2"
+              onClick={() => toggleExpand(currentPath)}
+              className="block items-center text-sm font-medium text-white hover:text-hoverColor "
             >
-              Key:
+              {key}
             </label>
-            <div>
+            {isObject ? (
+              <button
+                className="flex items-center gap-2 text-sm font-medium hover:text-hoverColor  text-white"
+                onClick={() => toggleExpand(currentPath)}
+              >
+                {isExpanded ? (
+                  <IoIosArrowDown className="h-4 w-4" />
+                ) : (
+                  <IoIosArrowForward className="h-4 w-4" />
+                )}
+              </button>
+            ) : isNumber ? (
               <input
-                id={`${inputKey}-key`}
-                type="text"
-                value={key}
+                id={`${inputKey}-value`}
+                type="number"
+                value={value === null ? "" : value}
                 onChange={(e) =>
-                  handleKeyChange(index, currentPath, e.target.value)
+                  handleInputChange(index, currentPath, Number(e.target.value))
                 }
                 className="input mt-1 block w-full rounded-md"
               />
-            </div>
-          </div>
-          <div>
-            <label
-              htmlFor={`${inputKey}-value`}
-              className="block text-sm font-medium text-white mt-2"
-            >
-              Value:
-            </label>
-            {typeof value === "object" && value !== null ? (
-              <div className="ml-4">
-                {renderInputs(value, index, currentPath)}
-              </div>
-            ) : isNumber ? (
-              <div>
-                <input
-                  id={`${inputKey}-value`}
-                  type="number"
-                  value={value === null ? "value" : value}
-                  onChange={(e) =>
-                    handleInputChange(
-                      index,
-                      currentPath,
-                      Number(e.target.value)
-                    )
-                  }
-                  className="input mt-1 block w-full rounded-md"
-                />
-              </div>
             ) : (
-              <div>
-                <input
-                  id={`${inputKey}-value`}
-                  type="text"
-                  value={value === null ? "value" : value}
-                  onChange={(e) =>
-                    handleInputChange(index, currentPath, e.target.value)
-                  }
-                  className="input mt-1 block w-full rounded-md"
-                />
-              </div>
+              <input
+                id={`${inputKey}-value`}
+                type="text"
+                value={value === null ? "" : value}
+                onChange={(e) =>
+                  handleInputChange(index, currentPath, e.target.value)
+                }
+                className="input mt-1 block w-full rounded-md"
+              />
             )}
           </div>
+          {isObject && isExpanded && (
+            <div className="ml-6">
+              {renderInputs(value, index, currentPath)}
+            </div>
+          )}
         </div>
       );
     });
+  };
+
+  const renderMetadataAndSpec = (obj: any, index: number) => {
+    return (
+      <div>
+        {renderInputs({ metadata: obj.metadata }, index, "metadata")}
+        {renderInputs({ spec: obj.spec }, index, "spec")}
+      </div>
+    );
   };
 
   return (
@@ -116,14 +122,16 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
       className="flex flex-col gap-4 overflow-auto h-[650px]"
     >
       {jsonObjects.map((obj, index) => {
+        const isDeployment = obj.kind === "Deployment";
+
         return (
           <div
             key={index}
-            className="bg-backgrounColor2 p-4 rounded-lg hover:shadow-md hover:shadow-cyan-950"
+            className="bg-backgroundColor2 p-4 rounded-lg hover:shadow-md hover:shadow-cyan-950"
           >
             <div className="flex items-center justify-between cursor-pointer">
               <h3
-                className="text-lg font-medium mb-2 hover:texst-hoverColor"
+                className="text-lg font-medium mb-2 hover:text-hoverColor"
                 onClick={() => toggleKindVisibility(index)}
               >
                 Kind: {obj.kind || "Unknown"}
@@ -185,7 +193,9 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                 )}
                 {activeTab[index] === "Advanced" && (
                   <div className="transition-all duration-100 ease-in-out opacity-100">
-                    {renderInputs(obj, index)}
+                    {isDeployment
+                      ? renderMetadataAndSpec(obj, index)
+                      : renderInputs(obj, index)}
                   </div>
                 )}
               </div>

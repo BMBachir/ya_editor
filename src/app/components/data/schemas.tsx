@@ -6,23 +6,12 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
     kind: "Deployment",
     metadata: {
       name: "",
-      labels: {
-        app: "",
-      },
+      namespace: "default",
+      labels: "",
     },
     spec: {
       replicas: 1,
-      selector: {
-        matchLabels: {
-          app: "",
-        },
-      },
       template: {
-        metadata: {
-          labels: {
-            app: "",
-          },
-        },
         spec: {
           containers: [
             {
@@ -33,8 +22,21 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
                   containerPort: 80,
                 },
               ],
+              securityContext: {
+                privileged: false,
+              },
+              resources: {
+                requests: {
+                  cpu: "",
+                  memory: "",
+                },
+              },
+              command: "",
+              args: "",
+              env: "",
             },
           ],
+          imagePullSecrets: "",
         },
       },
     },
