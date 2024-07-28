@@ -42,40 +42,14 @@ export function useResourceManagement(
   }
 
   const handleAddResource = (resourceType: string) => {
-    if (!(resourceType in k8sDefinitions)) {
+    if (!(resourceType in simpleSchemas)) {
       console.error(`Invalid resource type: ${resourceType}`);
       return;
     }
 
-    const resource =
-      k8sDefinitions[resourceType as keyof typeof k8sDefinitions];
+    const resource = simpleSchemas[resourceType as keyof typeof simpleSchemas];
 
-    if (!("properties" in resource)) {
-      console.error(`No properties found for resource type: ${resourceType}`);
-      return;
-    }
-
-    const properties = resource.properties as {
-      [key: string]: { type?: string; items?: any; $ref?: string };
-    };
-
-    const newResource = Object.keys(properties).reduce((acc, key) => {
-      const property = properties[key];
-      if (key === "kind") {
-        acc[key] = getLastWord(resourceType);
-      } else if (property.items && property.items.$ref) {
-        const refValue = property.items.$ref.replace("#/definitions/", "");
-        acc[key] = [resolveRef(refValue)];
-      } else if (property.$ref) {
-        const refValue = property.$ref.replace("#/definitions/", "");
-        acc[key] = resolveRef(refValue);
-      } else {
-        const propertyType = property.type;
-        acc[key] = getDefaultForType(propertyType || "");
-      }
-
-      return acc;
-    }, {} as { [key: string]: any });
+    const newResource = { ...resource };
 
     setJsonObjects((prev) => {
       const updated = [...prev, newResource];

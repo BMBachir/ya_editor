@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 import { isNumberKey } from "./UtilityFunctions/utils";
-import { defaultSchema, specificSchemas } from "./data/schemas";
+
 import SimpleFields from "./SimpleFields";
 
 interface ResourceEditorProps {
@@ -116,11 +116,6 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
       className="flex flex-col gap-4 overflow-auto h-[650px]"
     >
       {jsonObjects.map((obj, index) => {
-        const schema = {
-          ...defaultSchema,
-          ...specificSchemas[obj.kind],
-        };
-
         return (
           <div
             key={index}
@@ -128,7 +123,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
           >
             <div className="flex items-center justify-between cursor-pointer">
               <h3
-                className="text-lg font-medium mb-2 hover:text-hoverColor"
+                className="text-lg font-medium mb-2 hover:texst-hoverColor"
                 onClick={() => toggleKindVisibility(index)}
               >
                 Kind: {obj.kind || "Unknown"}
@@ -186,15 +181,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                   </div>
                 </div>
                 {activeTab[index] === "Simple" && (
-                  <div className="transition-all duration-100 ease-in-out opacity-100">
-                    <SimpleFields
-                      schema={schema}
-                      values={obj}
-                      handleInputChange={(path, value) =>
-                        handleInputChange(index, path, value)
-                      }
-                    />
-                  </div>
+                  <div className="transition-all duration-100 ease-in-out opacity-100"></div>
                 )}
                 {activeTab[index] === "Advanced" && (
                   <div className="transition-all duration-100 ease-in-out opacity-100">

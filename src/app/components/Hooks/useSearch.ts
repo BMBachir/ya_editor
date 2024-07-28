@@ -21,7 +21,7 @@ export const useSearch = (
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    setSearchTerm(getLastWord(suggestion));
+    setSearchTerm(suggestion);
     setShowSuggestions(false);
     handleAddResource(suggestion);
   };
