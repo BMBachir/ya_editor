@@ -11,7 +11,7 @@ interface SearchBarProps {
   handleSearchChange: (e: ChangeEvent<HTMLInputElement>) => void;
   handleSearchShow: () => void;
   showSuggestions: boolean;
-  filteredSuggestions: string[];
+  SimpleSchemas: string[];
   handleSuggestionClick: (suggestion: string) => void;
   handleClearYaml: () => void;
   setShowSuggestions: (value: boolean) => void;
@@ -24,8 +24,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   handleSearchChange,
   setShowSuggestions,
   handleSearchShow,
-  showSuggestions,
-  filteredSuggestions,
+  SimpleSchemas,
   handleSuggestionClick,
   handleClearYaml,
   handleClearSearch,
@@ -104,10 +103,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
                   </div>
                 )}
               </div>
-              {filteredSuggestions.length > 0 && (
+              {SimpleSchemas.length > 0 && (
                 <div className="mt-2 bg-backgrounColor2 rounded-lg shadow-lg w-full">
                   <ul className="max-h-64 overflow-y-auto">
-                    {filteredSuggestions.map((suggestion, index) => (
+                    {SimpleSchemas.map((suggestion, index) => (
                       <li
                         key={index}
                         className="cursor-pointer px-4 py-3 text-sm hover:bg-gray-700"

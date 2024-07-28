@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { k8sDefinitions } from "../data/definitions";
+import { simpleSchemas } from "../data/schemas";
 import { getLastWord } from "../UtilityFunctions/utils";
 
 export const useSearch = (
@@ -9,23 +9,11 @@ export const useSearch = (
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
 
-  interface Resource {
-    description: string;
-    properties?: Record<string, any>;
-  }
+  const schemas = Object.keys(simpleSchemas);
 
-  const kinds = Object.keys(k8sDefinitions) as (keyof typeof k8sDefinitions)[];
-
-  const filteredSuggestions = kinds.filter((kind) => {
-    const resource = k8sDefinitions[
-      kind as keyof typeof k8sDefinitions
-    ] as Resource;
-    return (
-      kind.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      resource.properties &&
-      "kind" in resource.properties
-    );
-  });
+  const SimpleSchemas = schemas.filter((schema) =>
+    schema.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -59,7 +47,7 @@ export const useSearch = (
     handleSearchChange,
     handleSuggestionClick,
     handleSearchShow,
-    filteredSuggestions,
+    SimpleSchemas,
     handleClearSearch,
   };
 };

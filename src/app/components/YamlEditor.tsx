@@ -49,7 +49,7 @@ const YamlEditor: React.FC = () => {
     handleSearchShow,
     showSuggestions,
     handleClearSearch,
-    filteredSuggestions,
+    SimpleSchemas,
   } = useSearch((resourceType: string) => {
     handleAddResource(resourceType);
   });
@@ -76,7 +76,7 @@ const YamlEditor: React.FC = () => {
                     handleSearchChange={handleSearchChange}
                     handleSearchShow={handleSearchShow}
                     showSuggestions={showSuggestions}
-                    filteredSuggestions={filteredSuggestions}
+                    SimpleSchemas={SimpleSchemas}
                     handleSuggestionClick={handleSuggestionClick}
                   />
                 </div>
