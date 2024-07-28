@@ -154,9 +154,9 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
     },
     rules: [
       {
-        apiGroups: [""],
-        resources: [""],
-        verbs: [""],
+        apiGroups: "",
+        resources: "",
+        verbs: "",
       },
     ],
   },

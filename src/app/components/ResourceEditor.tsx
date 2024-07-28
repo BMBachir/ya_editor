@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 import { isNumberKey } from "./UtilityFunctions/utils";
-import SimpleFields from "./SimpleFields";
 
 interface ResourceEditorProps {
   jsonObjects: any[];
@@ -47,64 +46,130 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
       return [];
     }
 
+    return Object.keys(obj)
+      .map((key) => {
+        // Skip rendering inputs for apiVersion and kind
+        if (key === "apiVersion" || key === "kind") {
+          return null;
+        }
+
+        const value = obj[key];
+        const currentPath = path ? `${path}.${key}` : key;
+        const inputKey = `${index}-${currentPath}`;
+        const isNumber = isNumberKey(currentPath);
+        const isObject = typeof value === "object" && value !== null;
+        const isExpanded = expandedPaths.has(currentPath);
+
+        return (
+          <div key={inputKey} className="mb-2 flex flex-col">
+            <div className="flex items-center justify-between gap-5 mt-5 border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full">
+              <label
+                onClick={() => toggleExpand(currentPath)}
+                className="block items-center text-sm font-medium text-white hover:text-hoverColor"
+              >
+                {key}
+              </label>
+              {isObject ? (
+                <button
+                  className="flex items-center gap-2 text-sm font-medium hover:text-hoverColor text-white"
+                  onClick={() => toggleExpand(currentPath)}
+                >
+                  {isExpanded ? (
+                    <IoIosArrowDown className="h-4 w-4" />
+                  ) : (
+                    <IoIosArrowForward className="h-4 w-4" />
+                  )}
+                </button>
+              ) : isNumber ? (
+                <input
+                  id={`${inputKey}-value`}
+                  type="number"
+                  value={value === null ? "" : value}
+                  onChange={(e) =>
+                    handleInputChange(
+                      index,
+                      currentPath,
+                      Number(e.target.value)
+                    )
+                  }
+                  className="input block w-full rounded-md"
+                />
+              ) : (
+                <input
+                  id={`${inputKey}-value`}
+                  type="text"
+                  value={value === null ? "" : value}
+                  onChange={(e) =>
+                    handleInputChange(index, currentPath, e.target.value)
+                  }
+                  className="input block w-full rounded-md"
+                />
+              )}
+            </div>
+            {isObject && isExpanded && (
+              <div className="ml-6">
+                {renderInputs(value, index, currentPath)}
+              </div>
+            )}
+          </div>
+        );
+      })
+      .filter((element): element is JSX.Element => element !== null); // Filter out null values and ensure the type is JSX.Element
+  };
+
+  const renderNestedObjects = (
+    obj: any,
+    index: number,
+    path = ""
+  ): JSX.Element[] => {
+    if (typeof obj !== "object" || obj === null) {
+      return [];
+    }
+
     return Object.keys(obj).map((key) => {
       const value = obj[key];
       const currentPath = path ? `${path}.${key}` : key;
       const inputKey = `${index}-${currentPath}`;
       const isNumber = isNumberKey(currentPath);
       const isObject = typeof value === "object" && value !== null;
-      const isExpanded = expandedPaths.has(currentPath);
 
       return (
-        <div key={inputKey} className="mb-2 flex flex-col">
-          <div className="flex items-center justify-between gap-5 border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full mt-8">
-            <label
-              onClick={() => toggleExpand(currentPath)}
-              className="block items-center text-sm font-medium text-white hover:text-hoverColor "
-            >
-              {key}
-            </label>
-            {isObject ? (
-              <button
-                className="flex items-center gap-2 text-sm font-medium hover:text-hoverColor  text-white"
-                onClick={() => toggleExpand(currentPath)}
-              >
-                {isExpanded ? (
-                  <IoIosArrowDown className="h-4 w-4" />
-                ) : (
-                  <IoIosArrowForward className="h-4 w-4" />
-                )}
-              </button>
-            ) : isNumber ? (
-              <input
-                id={`${inputKey}-value`}
-                type="number"
-                value={value === null ? "" : value}
-                onChange={(e) =>
-                  handleInputChange(index, currentPath, Number(e.target.value))
-                }
-                className="input mt-1 block w-full rounded-md"
-              />
-            ) : (
-              <input
-                id={`${inputKey}-value`}
-                type="text"
-                value={value === null ? "" : value}
-                onChange={(e) =>
-                  handleInputChange(index, currentPath, e.target.value)
-                }
-                className="input mt-1 block w-full rounded-md"
-              />
-            )}
-          </div>
-          {isObject && isExpanded && (
-            <div className="ml-6">
-              {renderInputs(value, index, currentPath)}
-            </div>
+        <div key={inputKey} className="mb-2">
+          <label className="block text-sm font-medium text-white">{key}</label>
+          {isObject ? (
+            renderNestedObjects(value, index, currentPath)
+          ) : isNumber ? (
+            <input
+              id={`${inputKey}-value`}
+              type="number"
+              value={value === null ? "" : value}
+              onChange={(e) =>
+                handleInputChange(index, currentPath, Number(e.target.value))
+              }
+              className="input mt-1 block w-full rounded-md"
+            />
+          ) : (
+            <input
+              id={`${inputKey}-value`}
+              type="text"
+              value={value === null ? "" : value}
+              onChange={(e) =>
+                handleInputChange(index, currentPath, e.target.value)
+              }
+              className="input mt-1 block w-full rounded-md"
+            />
           )}
         </div>
       );
     });
+  };
+
+  const renderSimpleView = (obj: any, index: number): JSX.Element[] => {
+    const metadata = obj.metadata || {};
+    const spec = obj.spec || {};
+    const combined = { ...metadata, ...spec };
+
+    return renderNestedObjects(combined, index);
   };
 
   const renderMetadataAndSpec = (obj: any, index: number) => {
@@ -189,7 +254,9 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                   </div>
                 </div>
                 {activeTab[index] === "Simple" && (
-                  <div className="transition-all duration-100 ease-in-out opacity-100"></div>
+                  <div className="transition-all duration-100 ease-in-out opacity-100">
+                    {renderSimpleView(obj, index)}
+                  </div>
                 )}
                 {activeTab[index] === "Advanced" && (
                   <div className="transition-all duration-100 ease-in-out opacity-100">
