@@ -5,7 +5,7 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
     apiVersion: "apps/v1",
     kind: "Deployment",
     metadata: {
-      name: "",
+      name: "Bachir",
       namespace: "default",
       labels: "",
     },
@@ -13,29 +13,28 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
       replicas: 1,
       template: {
         spec: {
-          containers: [
-            {
-              name: "",
-              image: "",
-              ports: [
-                {
-                  containerPort: 80,
-                },
-              ],
-              securityContext: {
-                privileged: false,
+          containers: {
+            name: "",
+            image: "",
+            ports: [
+              {
+                containerPort: 80,
               },
-              resources: {
-                requests: {
-                  cpu: "",
-                  memory: "",
-                },
-              },
-              command: "",
-              args: "",
-              env: "",
+            ],
+            securityContext: {
+              privileged: false,
             },
-          ],
+            resources: {
+              requests: {
+                cpu: "",
+                memory: "",
+              },
+            },
+            command: "",
+            args: "",
+            env: "",
+          },
+
           imagePullSecrets: "",
         },
       },
@@ -51,13 +50,11 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
       selector: {
         app: "",
       },
-      ports: [
-        {
-          protocol: "TCP",
-          port: 80,
-          targetPort: 80,
-        },
-      ],
+      ports: {
+        protocol: "TCP",
+        port: 80,
+        targetPort: 80,
+      },
     },
   },
   ConfigMap: {

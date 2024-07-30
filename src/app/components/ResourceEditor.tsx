@@ -23,7 +23,7 @@ interface ResourceEditorProps {
     newValue: any
   ) => void;
 }
-// Define the type with properties
+
 interface DefinitionWithProperties {
   description: string;
   properties: { [key: string]: any };
@@ -31,11 +31,10 @@ interface DefinitionWithProperties {
   type: string;
 }
 
-// Type guard function
 function hasProperties(
   kindDef: any
 ): kindDef is { properties: { [key: string]: any } } {
-  return "properties" in kindDef;
+  return "properties" in kindDef && typeof kindDef.properties === "object";
 }
 
 const ResourceEditor: React.FC<ResourceEditorProps> = ({
@@ -93,9 +92,15 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
           <div key={inputKey} className="mb-2 flex flex-col">
             <div className="flex items-center justify-between gap-5 mt-5 border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full">
               <div className="flex items-center gap-5">
+                <label
+                  onClick={() => toggleExpand(currentPath)}
+                  className="block text-sm font-medium text-white hover:text-primaryColor transition-colors duration-500"
+                >
+                  {key}
+                </label>
                 {isObject ? (
                   <button
-                    className="flex items-center gap-2 text-sm font-medium hover:text-hoverColor text-white"
+                    className="flex items-center gap-2 text-sm font-medium hover:text-hoverColor text-white transition-colors duration-500"
                     onClick={() => toggleExpand(currentPath)}
                   >
                     {isExpanded ? (
@@ -127,19 +132,15 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                     className="input block w-full rounded-md"
                   />
                 )}
-                <label
-                  onClick={() => toggleExpand(currentPath)}
-                  className="block text-sm font-medium text-white hover:text-hoverColor"
+              </div>
+              {isObject && (
+                <div
+                  onClick={toggleModal}
+                  className="flex items-center justify-center gap-1 cursor-pointer text-xs font-medium text-white hover:text-primaryColor bg-backgroundColor py-2 px-3 rounded-lg transition-colors duration-500"
                 >
-                  {key}
-                </label>
-              </div>
-              <div
-                onClick={toggleModal}
-                className="flex items-center justify-center gap-1 text-xs font-medium text-white hover:text-hoverColor bg-backgrounColor2 py-2 px-3 rounded-lg"
-              >
-                <IoAddOutline className="h-4 w-4" /> <span>Add</span>
-              </div>
+                  <IoAddOutline className="h-4 w-4" /> <span>Add</span>
+                </div>
+              )}
             </div>
             {isModalOpen && (
               <div
@@ -158,7 +159,6 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                         placeholder="Search..."
                         value={searchTerm}
                         onChange={(e) => {
-                          console.log("SearchTerm Updated:", e.target.value);
                           setSearchTerm(e.target.value);
                         }}
                         className="text-gray-400 bg-backgrounColor2 w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10"
@@ -176,16 +176,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                           {Object.entries(k8sDefinitions).map(
                             ([kindKey, kindDef]) => {
                               const lastKindPart = getLastWord(kindKey);
-                              const objKind = obj.kind || ""; // Ensure obj.kind is not undefined
-
-                              console.log(
-                                "KindKey:",
-                                kindKey,
-                                "LastKindPart:",
-                                lastKindPart,
-                                "ObjKind:",
-                                objKind
-                              );
+                              const objKind = obj.kind || "";
 
                               if (
                                 objKind === lastKindPart &&
@@ -197,11 +188,6 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                                   prop
                                     .toLowerCase()
                                     .includes(searchTerm.toLowerCase())
-                                );
-
-                                console.log(
-                                  "FilteredProperties:",
-                                  filteredProperties
                                 );
 
                                 return filteredProperties.length > 0 ? (
@@ -269,7 +255,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
               onChange={(e) =>
                 handleInputChange(index, currentPath, Number(e.target.value))
               }
-              className="input mt-1 block w-full rounded-md"
+              className="input block w-full rounded-md"
             />
           ) : (
             <input
@@ -279,7 +265,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
               onChange={(e) =>
                 handleInputChange(index, currentPath, e.target.value)
               }
-              className="input mt-1 block w-full rounded-md"
+              className="input block w-full rounded-md"
             />
           )}
         </div>
@@ -305,87 +291,75 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   };
 
   return (
-    <div
-      id="jsonInputs"
-      className="flex flex-col gap-4 overflow-auto h-[650px]"
-    >
+    <div>
       {jsonObjects.map((obj, index) => {
-        const isDeployment = obj.kind === "Deployment";
+        const isExpanded = expandedResourceIndex === index;
+        const tabs = ["Simple", "Advanced"];
+        const kind = obj.kind || "";
+        const apiVersion = obj.apiVersion || "";
+        const name = obj.metadata.name || "";
 
         return (
           <div
             key={index}
-            className="bg-backgroundColor2 p-4 rounded-lg hover:shadow-md hover:shadow-cyan-950"
+            className="resource-editor border border-primaryColor border-opacity-5 bg-backgrounColor2  shadow-md mb-4 rounded-md"
           >
-            <div className="flex items-center justify-between cursor-pointer">
-              <h3
-                className="text-lg font-medium mb-2 hover:text-hoverColor"
+            <div className="flex items-center justify-between p-2 px-4 border-b border-opacity-40 border-cyan-900 bg-backgrounColor1">
+              <button
+                className="text-xs text-primaryColor font-medium uppercase bg-backgrounColor2 rounded-full py-1 px-3 flex items-center gap-1 hover:text-hoverColor"
                 onClick={() => toggleKindVisibility(index)}
               >
-                Kind: {obj.kind || "Unknown"}
-              </h3>
-              <div className="flex items-center justify-center gap-5">
+                <span>{kind}</span>
+                {isExpanded ? (
+                  <IoIosArrowDown className="w-4 h-4" />
+                ) : (
+                  <IoIosArrowForward className="w-4 h-4" />
+                )}
+              </button>
+              <div className="flex items-center">
                 <button
-                  className="text-red-400 hover:text-red-500"
                   onClick={() => handleDeleteResource(index)}
+                  className="text-primaryColor hover:text-red-500"
                 >
-                  <MdDeleteOutline className="h-5 w-5" />
+                  <MdDeleteOutline className="w-5 h-5" />
                 </button>
-                <span
-                  className="hover:text-hoverColor"
-                  onClick={() => toggleKindVisibility(index)}
-                >
-                  {expandedResourceIndex === index ? (
-                    <IoIosArrowDown className="h-5 w-5" />
-                  ) : (
-                    <IoIosArrowForward className="h-5 w-5" />
-                  )}
-                </span>
               </div>
             </div>
-            {expandedResourceIndex === index && (
-              <div className="rounded-md overflow-auto h-screen transition-all duration-300 ease-in-out">
-                <div className="flex items-center justify-start gap-4 mb-4 transition-all duration-100 ease-in-out">
-                  <div className="bg-[#021825] py-2 rounded-lg">
-                    <button
-                      className={`ml-2 py-1 px-3 rounded-lg transition-colors duration-300 ease-in-out ${
-                        activeTab[index] === "Simple"
-                          ? "bg-[#123551] text-[#02B2EF]"
-                          : " text-gray-300"
-                      }`}
-                      onClick={() =>
-                        setActiveTab((prev) => ({ ...prev, [index]: "Simple" }))
-                      }
-                    >
-                      Simple
-                    </button>
-                    <button
-                      className={`mr-2 py-1 px-3 rounded-lg transition-colors duration-300 ease-in-out ${
-                        activeTab[index] === "Advanced"
-                          ? "bg-[#123551] text-[#02B2EF]"
-                          : " text-gray-300"
-                      }`}
-                      onClick={() =>
-                        setActiveTab((prev) => ({
-                          ...prev,
-                          [index]: "Advanced",
-                        }))
-                      }
-                    >
-                      Advanced
-                    </button>
+            {isExpanded && (
+              <div className="p-4 ">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-primaryColor ">
+                    {kind}
+                  </h3>
+                  <p className="text-sm text-gray-500">{name}</p>
+                </div>
+                <div className="tabs-container mb-4 ">
+                  <div className="tabs flex space-x-4">
+                    {tabs.map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() =>
+                          setActiveTab((prevTabs) => ({
+                            ...prevTabs,
+                            [index]: tab,
+                          }))
+                        }
+                        className={`${
+                          activeTab[index] === tab
+                            ? "text-primaryColor font-bold"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {tab}
+                      </button>
+                    ))}
                   </div>
                 </div>
-                {activeTab[index] === "Simple" && (
-                  <div className="transition-all duration-100 ease-in-out opacity-100">
-                    {renderSimpleView(obj, index)}
-                  </div>
-                )}
-                {activeTab[index] === "Advanced" && (
-                  <div className="transition-all duration-100 ease-in-out opacity-100">
-                    {isDeployment
-                      ? renderMetadataAndSpec(obj, index)
-                      : renderInputs(obj, index)}
+                {activeTab[index] === "Simple" ? (
+                  <div className="flex flex-col gap-4"> Soon..</div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {renderInputs(obj, index)}
                   </div>
                 )}
               </div>
