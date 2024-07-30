@@ -4,6 +4,8 @@ import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 import { isNumberKey } from "./UtilityFunctions/utils";
 import { IoAddOutline } from "react-icons/io5";
 import { CiCircleRemove } from "react-icons/ci";
+import { k8sDefinitions } from "./data/definitions";
+import { getLastWord } from "./UtilityFunctions/utils";
 
 interface ResourceEditorProps {
   jsonObjects: any[];
@@ -21,6 +23,20 @@ interface ResourceEditorProps {
     newValue: any
   ) => void;
 }
+// Define the type with properties
+interface DefinitionWithProperties {
+  description: string;
+  properties: { [key: string]: any };
+  required: string[];
+  type: string;
+}
+
+// Type guard function
+function hasProperties(
+  kindDef: any
+): kindDef is { properties: { [key: string]: any } } {
+  return "properties" in kindDef;
+}
 
 const ResourceEditor: React.FC<ResourceEditorProps> = ({
   jsonObjects,
@@ -33,10 +49,18 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   const [activeTab, setActiveTab] = useState<{ [key: number]: string }>({});
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
+
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      toggleModal();
+    }
+  };
+
   const toggleExpand = (path: string) => {
     const newExpandedPaths = new Set(expandedPaths);
     if (newExpandedPaths.has(path)) {
@@ -54,7 +78,6 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
 
     return Object.keys(obj)
       .map((key) => {
-        // Skip rendering inputs for apiVersion and kind
         if (key === "apiVersion" || key === "kind") {
           return null;
         }
@@ -119,7 +142,10 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
               </div>
             </div>
             {isModalOpen && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+              <div
+                onClick={handleOverlayClick}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+              >
                 <div
                   className="bg-backgroundColor rounded-lg p-6 relative"
                   style={{ width: "400px", height: "400px" }}
@@ -130,12 +156,73 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                       <input
                         type="text"
                         placeholder="Search..."
-                        value="search"
+                        value={searchTerm}
+                        onChange={(e) => {
+                          console.log("SearchTerm Updated:", e.target.value);
+                          setSearchTerm(e.target.value);
+                        }}
                         className="text-gray-400 bg-backgrounColor2 w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10"
                       />
-
                       <div className="absolute inset-y-0 right-2 flex items-center pr-3">
-                        <CiCircleRemove className="h-5 w-5 text-primaryColor cursor-pointer" />
+                        <CiCircleRemove
+                          className="h-5 w-5 text-primaryColor cursor-pointer"
+                          onClick={() => setSearchTerm("")}
+                        />
+                      </div>
+                    </div>
+                    <div className="overflow-auto w-full h-full">
+                      <div className="mt-2 bg-backgrounColor2 rounded-lg shadow-lg w-full">
+                        <ul className="max-h-64 overflow-y-auto">
+                          {Object.entries(k8sDefinitions).map(
+                            ([kindKey, kindDef]) => {
+                              const lastKindPart = getLastWord(kindKey);
+                              const objKind = obj.kind || ""; // Ensure obj.kind is not undefined
+
+                              console.log(
+                                "KindKey:",
+                                kindKey,
+                                "LastKindPart:",
+                                lastKindPart,
+                                "ObjKind:",
+                                objKind
+                              );
+
+                              if (
+                                objKind === lastKindPart &&
+                                hasProperties(kindDef)
+                              ) {
+                                const filteredProperties = Object.keys(
+                                  kindDef.properties
+                                ).filter((prop) =>
+                                  prop
+                                    .toLowerCase()
+                                    .includes(searchTerm.toLowerCase())
+                                );
+
+                                console.log(
+                                  "FilteredProperties:",
+                                  filteredProperties
+                                );
+
+                                return filteredProperties.length > 0 ? (
+                                  filteredProperties.map((prop) => (
+                                    <li
+                                      key={prop}
+                                      className="cursor-pointer px-4 py-3 text-sm hover:bg-gray-700"
+                                    >
+                                      <span>{prop}</span>
+                                    </li>
+                                  ))
+                                ) : (
+                                  <li className="px-4 py-3 text-sm text-gray-500">
+                                    No matching properties
+                                  </li>
+                                );
+                              }
+                              return null;
+                            }
+                          )}
+                        </ul>
                       </div>
                     </div>
                   </div>
@@ -150,7 +237,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
           </div>
         );
       })
-      .filter((element): element is JSX.Element => element !== null); // Filter out null values and ensure the type is JSX.Element
+      .filter((element): element is JSX.Element => element !== null);
   };
 
   const renderNestedObjects = (

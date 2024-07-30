@@ -58,9 +58,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               <MdClearAll className="h-6 w-6" />
             </button>
             <button
-              className={`text-${showSearch ? "red" : "green"}-500 hover:text-${
-                showSearch ? "red" : "green"
-              }-600 font-semibold rounded-md shadow-sm`}
+              className="font-semibold rounded-md shadow-sm"
               onClick={toggleModal}
             >
               {showSearch ? (

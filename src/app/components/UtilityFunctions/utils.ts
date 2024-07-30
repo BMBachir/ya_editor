@@ -29,10 +29,10 @@ export const updateNestedObject = (obj: any, path: string, newValue: any) => {
 };
 
 // Get the last word from a dot-separated string
-export const getLastWord = (str: string): string => {
-  const parts = str.split(".");
-  return parts[parts.length - 1];
-};
+
+export function getLastWord(str: string): string {
+  return str.split(".").pop() || "";
+}
 
 // Resolve $ref recursively to get nested properties
 // Example improved circular reference handling
