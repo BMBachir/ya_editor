@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 import { isNumberKey } from "./UtilityFunctions/utils";
+import { IoAddOutline } from "react-icons/io5";
+import { CiCircleRemove } from "react-icons/ci";
 
 interface ResourceEditorProps {
   jsonObjects: any[];
@@ -30,7 +32,11 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<{ [key: number]: string }>({});
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
   const toggleExpand = (path: string) => {
     const newExpandedPaths = new Set(expandedPaths);
     if (newExpandedPaths.has(path)) {
@@ -63,49 +69,79 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
         return (
           <div key={inputKey} className="mb-2 flex flex-col">
             <div className="flex items-center justify-between gap-5 mt-5 border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full">
-              <label
-                onClick={() => toggleExpand(currentPath)}
-                className="block items-center text-sm font-medium text-white hover:text-hoverColor"
-              >
-                {key}
-              </label>
-              {isObject ? (
-                <button
-                  className="flex items-center gap-2 text-sm font-medium hover:text-hoverColor text-white"
+              <div className="flex items-center gap-5">
+                {isObject ? (
+                  <button
+                    className="flex items-center gap-2 text-sm font-medium hover:text-hoverColor text-white"
+                    onClick={() => toggleExpand(currentPath)}
+                  >
+                    {isExpanded ? (
+                      <IoIosArrowDown className="h-3 w-3" />
+                    ) : (
+                      <IoIosArrowForward className="h-3 w-3" />
+                    )}
+                  </button>
+                ) : isNumber ? (
+                  <input
+                    type="number"
+                    value={value === null ? "" : value}
+                    onChange={(e) =>
+                      handleInputChange(
+                        index,
+                        currentPath,
+                        Number(e.target.value)
+                      )
+                    }
+                    className="input block w-full rounded-md"
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={value === null ? "" : value}
+                    onChange={(e) =>
+                      handleInputChange(index, currentPath, e.target.value)
+                    }
+                    className="input block w-full rounded-md"
+                  />
+                )}
+                <label
                   onClick={() => toggleExpand(currentPath)}
+                  className="block text-sm font-medium text-white hover:text-hoverColor"
                 >
-                  {isExpanded ? (
-                    <IoIosArrowDown className="h-4 w-4" />
-                  ) : (
-                    <IoIosArrowForward className="h-4 w-4" />
-                  )}
-                </button>
-              ) : isNumber ? (
-                <input
-                  id={`${inputKey}-value`}
-                  type="number"
-                  value={value === null ? "" : value}
-                  onChange={(e) =>
-                    handleInputChange(
-                      index,
-                      currentPath,
-                      Number(e.target.value)
-                    )
-                  }
-                  className="input block w-full rounded-md"
-                />
-              ) : (
-                <input
-                  id={`${inputKey}-value`}
-                  type="text"
-                  value={value === null ? "" : value}
-                  onChange={(e) =>
-                    handleInputChange(index, currentPath, e.target.value)
-                  }
-                  className="input block w-full rounded-md"
-                />
-              )}
+                  {key}
+                </label>
+              </div>
+              <div
+                onClick={toggleModal}
+                className="flex items-center justify-center gap-1 text-xs font-medium text-white hover:text-hoverColor bg-backgrounColor2 py-2 px-3 rounded-lg"
+              >
+                <IoAddOutline className="h-4 w-4" /> <span>Add</span>
+              </div>
             </div>
+            {isModalOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                <div
+                  className="bg-backgroundColor rounded-lg p-6 relative"
+                  style={{ width: "400px", height: "400px" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex flex-col items-center w-full h-full gap-4 relative">
+                    <div className="relative w-full">
+                      <input
+                        type="text"
+                        placeholder="Search..."
+                        value="search"
+                        className="text-gray-400 bg-backgrounColor2 w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10"
+                      />
+
+                      <div className="absolute inset-y-0 right-2 flex items-center pr-3">
+                        <CiCircleRemove className="h-5 w-5 text-primaryColor cursor-pointer" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             {isObject && isExpanded && (
               <div className="ml-6">
                 {renderInputs(value, index, currentPath)}
