@@ -100,7 +100,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                 </label>
                 {isObject ? (
                   <button
-                    className="flex items-center gap-2 text-sm font-medium hover:text-hoverColor text-white transition-colors duration-500"
+                    className="flex items-center gap-2 text-sm font-medium hover:text-hoverColor text-white "
                     onClick={() => toggleExpand(currentPath)}
                   >
                     {isExpanded ? (
@@ -302,7 +302,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
         return (
           <div
             key={index}
-            className="resource-editor border border-primaryColor border-opacity-5 bg-backgrounColor2  shadow-md mb-4 rounded-md"
+            className="resource-editor border border-primaryColor border-opacity-5 bg-backgrounColor2   shadow-md mb-4 rounded-md"
           >
             <div className="flex items-center justify-between p-2 px-4 border-b border-opacity-40 border-cyan-900 bg-backgrounColor1">
               <button
@@ -358,7 +358,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                 {activeTab[index] === "Simple" ? (
                   <div className="flex flex-col gap-4"> Soon..</div>
                 ) : (
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-4 h-[450px] overflow-auto">
                     {renderInputs(obj, index)}
                   </div>
                 )}
