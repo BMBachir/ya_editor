@@ -23,12 +23,17 @@ interface ResourceEditorProps {
     newValue: any
   ) => void;
 }
-
-interface DefinitionWithProperties {
+interface Property {
   description: string;
-  properties: { [key: string]: any };
-  required: string[];
   type: string;
+  $ref?: string; // Assuming $ref is optional
+}
+
+interface KindDefinition {
+  properties: {
+    [key: string]: Property; // Index signature for properties
+  };
+  // Other fields...
 }
 
 function hasProperties(
@@ -49,6 +54,8 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
+  const [ref, setRef] = useState<string>("No $ref available");
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -100,7 +107,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                 </label>
                 {isObject ? (
                   <button
-                    className="flex items-center gap-2 text-sm font-medium hover:text-hoverColor text-white "
+                    className="flex items-center gap-2 text-sm font-medium hover:text-hoverColor text-white"
                     onClick={() => toggleExpand(currentPath)}
                   >
                     {isExpanded ? (
@@ -158,9 +165,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                         type="text"
                         placeholder="Search..."
                         value={searchTerm}
-                        onChange={(e) => {
-                          setSearchTerm(e.target.value);
-                        }}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                         className="text-gray-400 bg-backgrounColor2 w-full rounded-lg pl-4 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-10"
                       />
                       <div className="absolute inset-y-0 right-2 flex items-center pr-3">
@@ -190,13 +195,25 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                                     .includes(searchTerm.toLowerCase())
                                 );
 
-                                return filteredProperties.length > 0 ? (
-                                  filteredProperties.map((prop) => (
+                                // Group refs based on properties
+                                const refs: { [key: string]: string } = {};
+                                filteredProperties.forEach((prop) => {
+                                  // Type assertion to specify the type of properties
+                                  const property = (
+                                    kindDef.properties as { [key: string]: any }
+                                  )[prop];
+                                  if (property?.$ref) {
+                                    refs[prop] = property.$ref;
+                                  }
+                                });
+
+                                return Object.keys(refs).length > 0 ? (
+                                  Object.entries(refs).map(([prop, ref]) => (
                                     <li
                                       key={prop}
                                       className="cursor-pointer px-4 py-3 text-sm hover:bg-gray-700"
                                     >
-                                      <span>{prop}</span>
+                                      <span>{getLastWord(ref)}</span>
                                     </li>
                                   ))
                                 ) : (

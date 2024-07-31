@@ -30,7 +30,10 @@ export const updateNestedObject = (obj: any, path: string, newValue: any) => {
 
 // Get the last word from a dot-separated string
 
-export function getLastWord(str: string): string {
+export function getLastWord(str: string | undefined): string {
+  if (typeof str !== "string") {
+    return "";
+  }
   return str.split(".").pop() || "";
 }
 
