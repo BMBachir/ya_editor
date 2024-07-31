@@ -356,9 +356,12 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                   </div>
                 </div>
                 {activeTab[index] === "Simple" ? (
-                  <div className="flex flex-col gap-4"> Soon..</div>
+                  <div className="flex flex-col gap-4 h-[450px] overflow-auto transition-all duration-100 ease-in-out opacity-100">
+                    {" "}
+                    {renderSimpleView(obj, index)}
+                  </div>
                 ) : (
-                  <div className="flex flex-col gap-4 h-[450px] overflow-auto">
+                  <div className="flex flex-col gap-4 h-[450px] overflow-auto transition-all duration-100 ease-in-out opacity-100">
                     {renderInputs(obj, index)}
                   </div>
                 )}
