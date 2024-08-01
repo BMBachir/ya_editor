@@ -370,11 +370,11 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                   <IoIosArrowForward className="w-4 h-4" />
                 )}
               </button>
-              <div className="flex items-center justify-center gap-1 cursor-pointer text-primaryColor hover:text-red-500">
-                <button
-                  onClick={() => handleDeleteResource(index)}
-                  className=" flex"
-                >
+              <div
+                onClick={() => handleDeleteResource(index)}
+                className="flex items-center justify-center gap-1 cursor-pointer text-primaryColor hover:text-red-500"
+              >
+                <button className=" flex">
                   <MdDeleteOutline className="w-5 h-5" />
                 </button>
                 <span className="felx items-center text-xs ">DELETE</span>{" "}

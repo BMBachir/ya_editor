@@ -66,8 +66,11 @@ export function useResourceManagement(
   const handleDeleteResource = (index: number) => {
     setJsonObjects((prev) => {
       const updated = [...prev];
-      updated.splice(index, 1); // Remove the resource at the specified index
-      setYamlValue(yamlStringify(updated));
+      updated.splice(index, 1);
+      const updatedYaml = updated
+        .map((item) => yamlStringify(item))
+        .join("---\n");
+      setYamlValue(updatedYaml);
       return updated;
     });
   };
