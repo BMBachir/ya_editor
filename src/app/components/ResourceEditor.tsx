@@ -77,6 +77,40 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
     setExpandedPaths(newExpandedPaths);
   };
 
+  const filterPropertiesRecursively = (
+    obj: any,
+    searchTerm: string,
+    path = ""
+  ): string[] => {
+    const result: string[] = [];
+
+    if (typeof obj === "object" && obj !== null) {
+      for (const key of Object.keys(obj)) {
+        const value = obj[key];
+        const currentPath = path ? `${path}.${key}` : key;
+
+        // Check if the key matches the search term
+        if (key.toLowerCase().includes(searchTerm.toLowerCase())) {
+          result.push(currentPath);
+        }
+
+        // Recursively search within nested objects
+        if (typeof value === "object") {
+          const nestedResults = filterPropertiesRecursively(
+            value,
+            searchTerm,
+            currentPath
+          );
+          if (nestedResults.length > 0) {
+            result.push(...nestedResults);
+          }
+        }
+      }
+    }
+
+    return result;
+  };
+
   const renderInputs = (obj: any, index: number, path = ""): JSX.Element[] => {
     if (typeof obj !== "object" || obj === null) {
       return [];
@@ -187,12 +221,15 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                                 objKind === lastKindPart &&
                                 hasProperties(kindDef)
                               ) {
+                                // Filter properties based on `obj`
                                 const filteredProperties = Object.keys(
                                   kindDef.properties
-                                ).filter((prop) =>
-                                  prop
-                                    .toLowerCase()
-                                    .includes(searchTerm.toLowerCase())
+                                ).filter(
+                                  (prop) =>
+                                    obj[prop] !== undefined && // Ensure property exists in `obj`
+                                    prop
+                                      .toLowerCase()
+                                      .includes(searchTerm.toLowerCase())
                                 );
 
                                 // Group refs based on properties
@@ -333,13 +370,14 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                   <IoIosArrowForward className="w-4 h-4" />
                 )}
               </button>
-              <div className="flex items-center">
+              <div className="flex items-center justify-center gap-1 cursor-pointer text-primaryColor hover:text-red-500">
                 <button
                   onClick={() => handleDeleteResource(index)}
-                  className="text-primaryColor hover:text-red-500"
+                  className=" flex"
                 >
                   <MdDeleteOutline className="w-5 h-5" />
                 </button>
+                <span className="felx items-center text-xs ">DELETE</span>{" "}
               </div>
             </div>
             {isExpanded && (
