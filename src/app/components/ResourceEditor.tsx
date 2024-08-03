@@ -23,6 +23,21 @@ interface ResourceEditorProps {
     newValue: any
   ) => void;
 }
+type K8sDefinitionsType = {
+  [key: string]: {
+    description: string;
+    properties: {
+      [key: string]: {
+        description: string;
+        type: string;
+        $ref?: string;
+      };
+    };
+    required?: string[];
+    type: string;
+  };
+};
+
 interface Property {
   description: string;
   type: string;
@@ -41,6 +56,24 @@ function hasProperties(
 ): kindDef is { properties: { [key: string]: any } } {
   return "properties" in kindDef && typeof kindDef.properties === "object";
 }
+
+interface Property {
+  description: string;
+  type: string;
+  $ref?: string;
+}
+
+interface KindDefinition {
+  properties: {
+    [key: string]: Property;
+  };
+  required?: string[];
+  type: string;
+}
+
+type K8sDefinitions = {
+  [key: string]: KindDefinition;
+};
 
 const ResourceEditor: React.FC<ResourceEditorProps> = ({
   jsonObjects,
@@ -134,7 +167,10 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
         const isExpanded = expandedPaths.has(currentPath);
 
         return (
-          <div key={inputKey} className="mb-2 flex flex-col">
+          <div
+            key={inputKey}
+            className="mb-2 flex flex-col transition-all duration-900"
+          >
             <div className="flex items-center justify-between gap-5 mt-5 border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full">
               <div className="flex items-center gap-5">
                 <label
@@ -214,7 +250,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                       </div>
                     </div>
                     <div className="overflow-auto w-full h-full">
-                      <div className="mt-2 bg-backgrounColor2 rounded-lg shadow-lg w-full">
+                      <div className="mt-2 bg-backgroundColor2 rounded-lg shadow-lg w-full">
                         <ul className="max-h-64 overflow-y-auto">
                           {Object.entries(k8sDefinitions).map(
                             ([kindKey, kindDef]) => {
@@ -254,14 +290,42 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                                 });
 
                                 return Object.keys(refs).length > 0 ? (
-                                  Object.entries(refs).map(([prop, ref]) => (
-                                    <li
-                                      key={prop}
-                                      className="cursor-pointer px-4 py-3 text-sm hover:bg-gray-700"
-                                    >
-                                      <span>{getLastWord(ref)}</span>
-                                    </li>
-                                  ))
+                                  Object.entries(refs).flatMap(
+                                    ([prop, ref]) => {
+                                      // Step 01: Clean the ref
+                                      const cleanedRef = ref.replace(
+                                        "#/definitions/",
+                                        ""
+                                      );
+
+                                      // Step 02: Search for it in k8sDefinitions with type assertion
+                                      const refDefinition = k8sDefinitions[
+                                        cleanedRef as keyof typeof k8sDefinitions
+                                      ] as {
+                                        properties: {
+                                          [key: string]: {
+                                            description: string;
+                                            type: string;
+                                            $ref?: string;
+                                          };
+                                        };
+                                      };
+
+                                      // Step 03: Display each property in its own <li>
+                                      return refDefinition
+                                        ? Object.keys(
+                                            refDefinition.properties
+                                          ).map((refProp) => (
+                                            <li
+                                              key={refProp}
+                                              className="cursor-pointer px-4 py-3 text-sm hover:bg-gray-700"
+                                            >
+                                              <span>{refProp}</span>
+                                            </li>
+                                          ))
+                                        : null;
+                                    }
+                                  )
                                 ) : (
                                   <li className="px-4 py-3 text-sm text-gray-500">
                                     No matching properties
@@ -364,11 +428,11 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
         return (
           <div
             key={index}
-            className="resource-editor border border-primaryColor border-opacity-5 bg-backgrounColor2   shadow-md mb-4 rounded-md"
+            className=" border border-primaryColor border-opacity-5 bg-backgrounColor2 transition-all duration-900  shadow-md mb-4 rounded-md"
           >
-            <div className="flex items-center justify-between p-2 px-4 border-b border-opacity-40 border-cyan-900 bg-backgrounColor1">
+            <div className="flex items-center justify-between p-2 px-4 border-b border-opacity-40 border-cyan-900 bg-backgrounColor1 transition-all duration-400">
               <button
-                className="text-xs text-primaryColor font-medium uppercase bg-backgrounColor2 rounded-full py-1 px-3 flex items-center gap-1 hover:text-hoverColor"
+                className="text-xs text-primaryColor font-medium uppercase bg-backgrounColor2 rounded-full py-1 px-3 flex items-center justify-center gap-2 hover:text-hoverColor transition-all duration-900"
                 onClick={() => toggleKindVisibility(index)}
               >
                 <span>{kind}</span>
@@ -380,7 +444,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
               </button>
               <div
                 onClick={() => handleDeleteResource(index)}
-                className="flex items-center justify-center gap-1 cursor-pointer text-primaryColor hover:text-red-500"
+                className="flex items-center justify-center gap-1 cursor-pointer text-primaryColor hover:text-red-500 transition-all duration-400"
               >
                 <button className=" flex">
                   <MdDeleteOutline className="w-5 h-5" />
@@ -389,7 +453,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
               </div>
             </div>
             {isExpanded && (
-              <div className="p-4 ">
+              <div className="p-4 transition-all duration-1000">
                 <div className="mb-4">
                   <h3 className="text-lg font-semibold text-primaryColor ">
                     {kind}
