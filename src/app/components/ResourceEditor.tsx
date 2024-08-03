@@ -12,31 +12,17 @@ interface ResourceEditorProps {
   expandedResourceIndex: number | null;
   toggleKindVisibility: (index: number) => void;
   handleDeleteResource: (index: number) => void;
-  handleKeyChange: (
-    resourceIndex: number,
-    path: string,
-    newKey: string
-  ) => void;
   handleInputChange: (
     resourceIndex: number,
     path: string,
     newValue: any
   ) => void;
+  handleAddRefProp: (
+    resourceIndex: number,
+    path: string,
+    refProp: string
+  ) => void;
 }
-type K8sDefinitionsType = {
-  [key: string]: {
-    description: string;
-    properties: {
-      [key: string]: {
-        description: string;
-        type: string;
-        $ref?: string;
-      };
-    };
-    required?: string[];
-    type: string;
-  };
-};
 
 interface Property {
   description: string;
@@ -71,23 +57,19 @@ interface KindDefinition {
   type: string;
 }
 
-type K8sDefinitions = {
-  [key: string]: KindDefinition;
-};
-
 const ResourceEditor: React.FC<ResourceEditorProps> = ({
   jsonObjects,
   expandedResourceIndex,
   toggleKindVisibility,
   handleDeleteResource,
-  handleKeyChange,
   handleInputChange,
+  handleAddRefProp,
 }) => {
   const [activeTab, setActiveTab] = useState<{ [key: number]: string }>({});
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string>("");
   const [nestedProperties, setNestedProperties] = useState<string[]>([]);
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -142,6 +124,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
 
     return result;
   };
+
   const handleAddClick = (key: string) => {
     setSelectedKey(key);
     setNestedProperties([]);
@@ -319,6 +302,13 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                                             <li
                                               key={refProp}
                                               className="cursor-pointer px-4 py-3 text-sm hover:bg-gray-700"
+                                              onClick={() =>
+                                                handleAddRefProp(
+                                                  index,
+                                                  currentPath,
+                                                  refProp
+                                                )
+                                              }
                                             >
                                               <span>{refProp}</span>
                                             </li>
@@ -370,31 +360,36 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
       const isObject = typeof value === "object" && value !== null;
 
       return (
-        <div key={inputKey} className="mb-2">
+        <div
+          key={inputKey}
+          className="mb-2 border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full "
+        >
           <label className="block text-sm font-medium text-white">{key}</label>
-          {isObject ? (
-            renderNestedObjects(value, index, currentPath)
-          ) : isNumber ? (
-            <input
-              id={`${inputKey}-value`}
-              type="number"
-              value={value === null ? "" : value}
-              onChange={(e) =>
-                handleInputChange(index, currentPath, Number(e.target.value))
-              }
-              className="input block w-full rounded-md"
-            />
-          ) : (
-            <input
-              id={`${inputKey}-value`}
-              type="text"
-              value={value === null ? "" : value}
-              onChange={(e) =>
-                handleInputChange(index, currentPath, e.target.value)
-              }
-              className="input block w-full rounded-md"
-            />
-          )}
+          <div className="">
+            {isObject ? (
+              renderNestedObjects(value, index, currentPath)
+            ) : isNumber ? (
+              <input
+                id={`${inputKey}-value`}
+                type="number"
+                value={value === null ? "" : value}
+                onChange={(e) =>
+                  handleInputChange(index, currentPath, Number(e.target.value))
+                }
+                className="input block w-full rounded-md"
+              />
+            ) : (
+              <input
+                id={`${inputKey}-value`}
+                type="text"
+                value={value === null ? "" : value}
+                onChange={(e) =>
+                  handleInputChange(index, currentPath, e.target.value)
+                }
+                className="input block w-full rounded-md"
+              />
+            )}
+          </div>
         </div>
       );
     });
@@ -406,15 +401,6 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
     const combined = { ...metadata, ...spec };
 
     return renderNestedObjects(combined, index);
-  };
-
-  const renderMetadataAndSpec = (obj: any, index: number) => {
-    return (
-      <div>
-        {renderInputs({ metadata: obj.metadata }, index, "metadata")}
-        {renderInputs({ spec: obj.spec }, index, "spec")}
-      </div>
-    );
   };
 
   return (

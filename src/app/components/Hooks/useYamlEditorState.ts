@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { parseAllDocuments, stringify as yamlStringify } from "yaml";
 import { parse as jsonParse, stringify as jsonStringify } from "json5";
-
+import { updateNestedObject } from "../UtilityFunctions/utils";
 export const useYamlEditorState = () => {
   const [yamlValue, setYamlValue] = useState<string>("");
   const [jsonObjects, setJsonObjects] = useState<any[]>([]);
@@ -72,6 +72,23 @@ export const useYamlEditorState = () => {
       console.error("Error parsing YAML:", error);
     }
   };
+
+  const handleAddRefProp = (
+    resourceIndex: number,
+    path: string,
+    refProp: string
+  ) => {
+    setJsonObjects((prev) => {
+      const updated = [...prev];
+      updateNestedObject(updated[resourceIndex], path, { $ref: refProp });
+      const updatedYaml = updated
+        .map((item) => yamlStringify(item))
+        .join("---\n");
+      setYamlValue(updatedYaml);
+      return updated;
+    });
+  };
+
   return {
     yamlValue,
     setYamlValue,
@@ -85,5 +102,6 @@ export const useYamlEditorState = () => {
     handleJsonToYaml,
     handleClearYaml,
     handleEditorChange,
+    handleAddRefProp,
   };
 };

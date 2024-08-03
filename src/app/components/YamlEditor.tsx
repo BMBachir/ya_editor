@@ -29,6 +29,7 @@ const YamlEditor: React.FC = () => {
     handleJsonToYaml,
     handleClearYaml,
     handleEditorChange,
+    handleAddRefProp,
   } = useYamlEditorState();
 
   const {
@@ -37,7 +38,6 @@ const YamlEditor: React.FC = () => {
     toggleKindVisibility,
     handleDeleteResource,
     handleInputChange,
-    handleKeyChange,
   } = useResourceManagement(setYamlValue, setJsonObjects);
 
   const {
@@ -88,7 +88,7 @@ const YamlEditor: React.FC = () => {
                     toggleKindVisibility={toggleKindVisibility}
                     handleDeleteResource={handleDeleteResource}
                     handleInputChange={handleInputChange}
-                    handleKeyChange={handleKeyChange}
+                    handleAddRefProp={handleAddRefProp}
                   />
                 </div>
               </div>
