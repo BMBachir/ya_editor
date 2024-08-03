@@ -54,9 +54,8 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
-  const [ref, setRef] = useState<string>("No $ref available");
-
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [nestedProperties, setNestedProperties] = useState<string[]>([]);
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -109,6 +108,11 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
     }
 
     return result;
+  };
+  const handleAddClick = (key: string) => {
+    setSelectedKey(key);
+    setNestedProperties([]);
+    toggleModal();
   };
 
   const renderInputs = (obj: any, index: number, path = ""): JSX.Element[] => {
@@ -176,7 +180,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
               </div>
               {isObject && (
                 <div
-                  onClick={toggleModal}
+                  onClick={() => handleAddClick(key)}
                   className="flex items-center justify-center gap-1 cursor-pointer text-xs font-medium text-white hover:text-primaryColor bg-backgroundColor py-2 px-3 rounded-lg transition-colors duration-500"
                 >
                   <IoAddOutline className="h-4 w-4" /> <span>Add</span>
@@ -221,24 +225,29 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                                 objKind === lastKindPart &&
                                 hasProperties(kindDef)
                               ) {
-                                // Filter properties based on `obj`
-                                const filteredProperties = Object.keys(
-                                  kindDef.properties
-                                ).filter(
-                                  (prop) =>
-                                    obj[prop] !== undefined && // Ensure property exists in `obj`
-                                    prop
-                                      .toLowerCase()
-                                      .includes(searchTerm.toLowerCase())
-                                );
+                                // Type assertion to specify the type of kindDef
+                                const kindDefTyped = kindDef as KindDefinition;
+
+                                // Filter properties based on the selected key
+                                const filteredProperties = selectedKey
+                                  ? Object.keys(kindDefTyped.properties).filter(
+                                      (prop) =>
+                                        kindDefTyped.properties[prop].$ref &&
+                                        prop === selectedKey
+                                    )
+                                  : Object.keys(kindDefTyped.properties).filter(
+                                      (prop) =>
+                                        kindDefTyped.properties[prop].$ref &&
+                                        prop
+                                          .toLowerCase()
+                                          .includes(searchTerm.toLowerCase())
+                                    );
 
                                 // Group refs based on properties
                                 const refs: { [key: string]: string } = {};
                                 filteredProperties.forEach((prop) => {
-                                  // Type assertion to specify the type of properties
-                                  const property = (
-                                    kindDef.properties as { [key: string]: any }
-                                  )[prop];
+                                  const property =
+                                    kindDefTyped.properties[prop];
                                   if (property?.$ref) {
                                     refs[prop] = property.$ref;
                                   }
@@ -350,7 +359,6 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
         const isExpanded = expandedResourceIndex === index;
         const tabs = ["Simple", "Advanced"];
         const kind = obj.kind || "";
-        const apiVersion = obj.apiVersion || "";
         const name = obj.metadata.name || "";
 
         return (
