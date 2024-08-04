@@ -6,7 +6,7 @@ import { IoAddOutline } from "react-icons/io5";
 import { CiCircleRemove } from "react-icons/ci";
 import { k8sDefinitions } from "./data/definitions";
 import { getLastWord } from "./UtilityFunctions/utils";
-
+import { commonFields } from "./data/commonFields";
 interface ResourceEditorProps {
   jsonObjects: any[];
   expandedResourceIndex: number | null;
@@ -63,7 +63,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedKey, setSelectedKey] = useState<string>("");
   const [nestedProperties, setNestedProperties] = useState<string[]>([]);
-
+  const [tab, setTab] = useState("Simple");
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -143,13 +143,13 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
         return (
           <div
             key={inputKey}
-            className="mb-2 flex flex-col transition-all duration-900"
+            className="mb-2 flex flex-col transition-all duration-900 "
           >
-            <div className="flex items-center justify-between gap-5 mt-5 border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full">
-              <div className="flex items-center gap-5">
+            <div className="flex items-center justify-between gap-5 mt-1 border border-opacity-30 hover:bg-backgroundColor border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full">
+              <div className="flex items-center gap-5 w-full">
                 <label
                   onClick={() => toggleExpand(currentPath)}
-                  className="block text-sm font-medium text-white hover:text-primaryColor transition-colors duration-500"
+                  className="block text-sm font-medium text-white hover:text-primaryColor transition-colors duration-500 "
                 >
                   {key}
                 </label>
@@ -191,7 +191,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
               {isObject && (
                 <div
                   onClick={() => handleAddClick(key)}
-                  className="flex items-center justify-center gap-1 cursor-pointer text-xs font-medium text-white hover:text-primaryColor bg-backgroundColor py-2 px-3 rounded-lg transition-colors duration-500"
+                  className="flex items-center justify-center gap-1 cursor-pointer text-xs font-medium text-white hover:text-primaryColor bg-backgroundColor hover:bg-backgrounColor2 py-2 px-3 rounded-lg transition-colors duration-500"
                 >
                   <IoAddOutline className="h-4 w-4" /> <span>Add</span>
                 </div>
@@ -348,7 +348,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
       return (
         <div
           key={inputKey}
-          className="mb-2 border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full "
+          className="mb-2  border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full "
         >
           <label className="block text-sm font-medium text-white mb-2">
             {key}
@@ -402,19 +402,25 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
         return (
           <div
             key={index}
-            className=" border border-primaryColor border-opacity-5 bg-backgrounColor2 transition-all duration-900  shadow-md mb-4 rounded-md"
+            className=" border border-primaryColor border-opacity-5 bg-backgrounColor2 transition-all duration-900 hover:shadow-all-sides mb-4 rounded-md"
           >
-            <div className="flex items-center justify-between p-2 px-4 border-b border-opacity-40 border-cyan-900 bg-backgrounColor1 transition-all duration-400">
+            <div className="flex items-center justify-between p-2 px-4  bg-backgrounColor1 transition-all duration-400">
               <button
-                className="text-xs text-primaryColor font-medium uppercase bg-backgrounColor2 rounded-full  py-1 px-3 flex items-center justify-center gap-2 hover:text-hoverColor transition-all duration-900"
+                className=" text-primaryColor font-medium  bg-backgrounColor2 rounded-full  py-1 px-3 flex items-center justify-center gap-6 hover:text-hoverColor transition-all duration-900"
                 onClick={() => toggleKindVisibility(index)}
               >
-                <span>{kind}</span>
-                {isExpanded ? (
-                  <IoIosArrowDown className="w-4 h-4" />
-                ) : (
-                  <IoIosArrowForward className="w-4 h-4" />
-                )}
+                <div className=" flex-col ">
+                  <h3 className="text-lg font-semibold ">{kind}</h3>
+                  <p className="text-sm text-gray-500">{name}</p>
+                </div>
+
+                <div>
+                  {isExpanded ? (
+                    <IoIosArrowDown className="w-4 h-4" />
+                  ) : (
+                    <IoIosArrowForward className="w-4 h-4" />
+                  )}
+                </div>
               </button>
               <div
                 onClick={() => handleDeleteResource(index)}
@@ -427,45 +433,45 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
               </div>
             </div>
             {isExpanded && (
-              <div className="p-4 transition-all duration-1000">
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-primaryColor">
-                    {kind}
-                  </h3>
-                  <p className="text-sm text-gray-500">{name}</p>
-                </div>
+              <div className="p-4 transition-all duration-1000 border-t border-opacity-40 border-cyan-900">
                 <div className="tabs-container mb-4 ">
-                  <div className="tabs flex space-x-4">
-                    {tabs.map((tab) => (
+                  <div className="tabs  ">
+                    <div className=" border-b border-solid border-cyan-900 ">
                       <button
-                        key={tab}
-                        onClick={() =>
-                          setActiveTab((prevTabs) => ({
-                            ...prevTabs,
-                            [index]: tab,
-                          }))
-                        }
-                        className={`${
-                          activeTab[index] === tab
-                            ? "text-primaryColor font-bold"
-                            : "text-gray-500"
-                        }`}
+                        onClick={() => setTab("Simple")}
+                        className={` ${
+                          tab === "Simple" &&
+                          "border-b border-solid border-primaryColor "
+                        } py-2 px-5 mr-5 text-[16px] leading-7 text-headingColor font-semibold `}
                       >
-                        {tab}
+                        Simple
                       </button>
-                    ))}
+                      <button
+                        onClick={() => setTab("Advanced")}
+                        className={` ${
+                          tab === "Advanced" &&
+                          "border-b border-solid border-primaryColor "
+                        } py-2 px-5 mr-5 text-[16px] leading-7 text-headingColor font-semibold  `}
+                      >
+                        Advanced
+                      </button>
+                    </div>
+
+                    <div className=" ">
+                      {tab === "Simple" && (
+                        <div className="flex flex-col gap-4 mt-5 max-h-[450px] overflow-auto transition-all duration-100 ease-in-out opacity-100">
+                          {" "}
+                          {renderSimpleView(obj, index)}
+                        </div>
+                      )}
+                      {tab === "Advanced" && (
+                        <div className="flex flex-col gap-4 mt-5  max-h-[450px] overflow-auto transition-all duration-100 ease-in-out opacity-100">
+                          {renderInputs(obj, index)}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-                {activeTab[index] === "Simple" ? (
-                  <div className="flex flex-col gap-4 h-[450px] overflow-auto transition-all duration-100 ease-in-out opacity-100">
-                    {" "}
-                    {renderSimpleView(obj, index)}
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-4 h-[450px] overflow-auto transition-all duration-100 ease-in-out opacity-100">
-                    {renderInputs(obj, index)}
-                  </div>
-                )}
               </div>
             )}
           </div>

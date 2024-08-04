@@ -10,6 +10,12 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      boxShadow: {
+        "all-sides": "0 0 6px 0 #015f80",
+        "all-sides-md": "0 0 15px 0 #00BEFF",
+        "all-sides-lg": "0 0 20px 0 #00BEFF",
+        // Add more custom shadows as needed
+      },
       colors: {
         backgroundColor: "#021825",
         backgrounColor2: "#071B27",
