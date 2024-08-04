@@ -44,21 +44,21 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <>
-      <div className="flex items-center justify-between gap-80 mb-3">
-        <div className="flex">
-          <h2 className="text-xl font-semibold">Edit from inputs</h2>
+      <div className="flex items-center justify-between mb-3 ">
+        <div className="flex items-center">
+          <span className="text-xl font-semibold">Resources</span>
         </div>
 
-        <div className="flex-1">
-          <div className="flex items-center gap-6">
+        <div className="flex items-center ml-auto">
+          <div className="flex items-center gap-6  transition-all duration-900">
             <button
-              className="text-red-500 hover:text-red-600 font-semibold rounded-md shadow-sm"
+              className="text-red-500 hover:bg-red-500 hover:bg-opacity-15 py-1 px-1 font-semibold rounded-md shadow-sm  transition-all duration-900"
               onClick={handleClearYaml}
             >
               <MdClearAll className="h-6 w-6" />
             </button>
             <button
-              className="font-semibold rounded-md shadow-sm"
+              className="font-semibold rounded-md text-primaryColor hover:bg-primaryColor hover:bg-opacity-15 py-1 px-1 shadow-sm  transition-all duration-900"
               onClick={toggleModal}
             >
               {showSearch ? (

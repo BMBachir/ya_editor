@@ -66,7 +66,7 @@ const YamlEditor: React.FC = () => {
             <div className="flex flex-col md:flex-row flex-1 mt-7">
               {/* Left Column */}
               <div className="bg-backgroundColor p-6 w-full md:w-1/3 flex flex-col rounded-lg gap-6 overflow-auto">
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4">
                   <SearchBar
                     handleClearSearch={handleClearSearch}
                     setShowSuggestions={setShowSuggestions}

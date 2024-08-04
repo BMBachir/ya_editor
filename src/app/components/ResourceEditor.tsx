@@ -395,7 +395,6 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
     <div>
       {jsonObjects.map((obj, index) => {
         const isExpanded = expandedResourceIndex === index;
-        const tabs = ["Simple", "Advanced"];
         const kind = obj.kind || "";
         const name = obj.metadata.name || "";
 
@@ -413,23 +412,26 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                   <h3 className="text-lg font-semibold ">{kind}</h3>
                   <p className="text-sm text-gray-500">{name}</p>
                 </div>
-
-                <div>
-                  {isExpanded ? (
-                    <IoIosArrowDown className="w-4 h-4" />
-                  ) : (
-                    <IoIosArrowForward className="w-4 h-4" />
-                  )}
-                </div>
               </button>
-              <div
-                onClick={() => handleDeleteResource(index)}
-                className="flex items-center justify-center gap-1 cursor-pointer text-primaryColor hover:text-red-500 transition-all duration-400"
-              >
-                <button className=" flex">
-                  <MdDeleteOutline className="w-5 h-5" />
-                </button>
-                <span className="felx items-center text-xs ">DELETE</span>{" "}
+              <div className="flex items-center justify-center gap-1 cursor-pointer  ">
+                <div className="flex items-center justify-center gap-5">
+                  <button
+                    onClick={() => handleDeleteResource(index)}
+                    className=" hover:text-red-500 text-primaryColor transition-all duration-400"
+                  >
+                    <MdDeleteOutline className="w-5 h-5" />
+                  </button>
+                  <div
+                    className="hover:text-hoverColor transition-all duration-400"
+                    onClick={() => toggleKindVisibility(index)}
+                  >
+                    {isExpanded ? (
+                      <IoIosArrowDown className="w-4 h-4" />
+                    ) : (
+                      <IoIosArrowForward className="w-4 h-4" />
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
             {isExpanded && (
