@@ -43,20 +43,6 @@ function hasProperties(
   return "properties" in kindDef && typeof kindDef.properties === "object";
 }
 
-interface Property {
-  description: string;
-  type: string;
-  $ref?: string;
-}
-
-interface KindDefinition {
-  properties: {
-    [key: string]: Property;
-  };
-  required?: string[];
-  type: string;
-}
-
 const ResourceEditor: React.FC<ResourceEditorProps> = ({
   jsonObjects,
   expandedResourceIndex,
@@ -65,12 +51,19 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   handleInputChange,
   handleAddRefProp,
 }) => {
-  const [activeTab, setActiveTab] = useState<{ [key: number]: string }>({});
+  // Initialize activeTab with "Simple" as the default tab for each resource
+  const [activeTab, setActiveTab] = useState<{ [key: number]: string }>(
+    jsonObjects.reduce((acc, _, index) => {
+      acc[index] = "Simple";
+      return acc;
+    }, {} as { [key: number]: string })
+  );
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedKey, setSelectedKey] = useState<string>("");
   const [nestedProperties, setNestedProperties] = useState<string[]>([]);
+
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -103,12 +96,10 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
         const value = obj[key];
         const currentPath = path ? `${path}.${key}` : key;
 
-        // Check if the key matches the search term
         if (key.toLowerCase().includes(searchTerm.toLowerCase())) {
           result.push(currentPath);
         }
 
-        // Recursively search within nested objects
         if (typeof value === "object") {
           const nestedResults = filterPropertiesRecursively(
             value,
@@ -244,10 +235,8 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                                 objKind === lastKindPart &&
                                 hasProperties(kindDef)
                               ) {
-                                // Type assertion to specify the type of kindDef
                                 const kindDefTyped = kindDef as KindDefinition;
 
-                                // Filter properties based on the selected key
                                 const filteredProperties = selectedKey
                                   ? Object.keys(kindDefTyped.properties).filter(
                                       (prop) =>
@@ -262,7 +251,6 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                                           .includes(searchTerm.toLowerCase())
                                     );
 
-                                // Group refs based on properties
                                 const refs: { [key: string]: string } = {};
                                 filteredProperties.forEach((prop) => {
                                   const property =
@@ -275,13 +263,11 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                                 return Object.keys(refs).length > 0 ? (
                                   Object.entries(refs).flatMap(
                                     ([prop, ref]) => {
-                                      // Step 01: Clean the ref
                                       const cleanedRef = ref.replace(
                                         "#/definitions/",
                                         ""
                                       );
 
-                                      // Step 02: Search for it in k8sDefinitions with type assertion
                                       const refDefinition = k8sDefinitions[
                                         cleanedRef as keyof typeof k8sDefinitions
                                       ] as {
@@ -294,7 +280,6 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                                         };
                                       };
 
-                                      // Step 03: Display each property in its own <li>
                                       return refDefinition
                                         ? Object.keys(
                                             refDefinition.properties
@@ -302,13 +287,14 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                                             <li
                                               key={refProp}
                                               className="cursor-pointer px-4 py-3 text-sm hover:bg-gray-700"
-                                              onClick={() =>
+                                              onClick={() => {
+                                                toggleModal();
                                                 handleAddRefProp(
                                                   index,
                                                   selectedKey,
                                                   refProp
-                                                )
-                                              }
+                                                );
+                                              }}
                                             >
                                               <span>{refProp}</span>
                                             </li>
@@ -364,7 +350,9 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
           key={inputKey}
           className="mb-2 border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full "
         >
-          <label className="block text-sm font-medium text-white">{key}</label>
+          <label className="block text-sm font-medium text-white mb-2">
+            {key}
+          </label>
           <div className="">
             {isObject ? (
               renderNestedObjects(value, index, currentPath)
@@ -418,7 +406,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
           >
             <div className="flex items-center justify-between p-2 px-4 border-b border-opacity-40 border-cyan-900 bg-backgrounColor1 transition-all duration-400">
               <button
-                className="text-xs text-primaryColor font-medium uppercase bg-backgrounColor2 rounded-full py-1 px-3 flex items-center justify-center gap-2 hover:text-hoverColor transition-all duration-900"
+                className="text-xs text-primaryColor font-medium uppercase bg-backgrounColor2 rounded-full  py-1 px-3 flex items-center justify-center gap-2 hover:text-hoverColor transition-all duration-900"
                 onClick={() => toggleKindVisibility(index)}
               >
                 <span>{kind}</span>
@@ -441,7 +429,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
             {isExpanded && (
               <div className="p-4 transition-all duration-1000">
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-primaryColor ">
+                  <h3 className="text-lg font-semibold text-primaryColor">
                     {kind}
                   </h3>
                   <p className="text-sm text-gray-500">{name}</p>
