@@ -25,7 +25,19 @@ export const updateNestedObject = (obj: any, path: string, newValue: any) => {
   for (let i = 0; i < keys.length - 1; i++) {
     current = current[keys[i]] = current[keys[i]] || {};
   }
-  current[keys[keys.length - 1]] = newValue;
+
+  // If the target is an object, merge the newValue with existing properties
+  if (
+    typeof current[keys[keys.length - 1]] === "object" &&
+    current[keys[keys.length - 1]] !== null
+  ) {
+    current[keys[keys.length - 1]] = {
+      ...current[keys[keys.length - 1]],
+      ...newValue,
+    };
+  } else {
+    current[keys[keys.length - 1]] = newValue;
+  }
 };
 
 // Get the last word from a dot-separated string

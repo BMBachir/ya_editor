@@ -78,15 +78,44 @@ export const useYamlEditorState = () => {
     path: string,
     refProp: string
   ) => {
-    setJsonObjects((prev) => {
-      const updated = [...prev];
-      updateNestedObject(updated[resourceIndex], path, { $ref: refProp });
-      const updatedYaml = updated
-        .map((item) => yamlStringify(item))
-        .join("---\n");
-      setYamlValue(updatedYaml);
-      return updated;
-    });
+    // Split the path into segments
+    const segments = path.split(".");
+    const lastSegment = segments.pop();
+
+    if (!lastSegment) {
+      console.error("Invalid path provided.");
+      return;
+    }
+
+    // Create a new object to avoid direct mutation
+    const newJsonObjects = [...jsonObjects];
+    let parentObj = newJsonObjects[resourceIndex];
+
+    // Navigate to the parent object
+    for (const segment of segments) {
+      if (parentObj[segment]) {
+        parentObj = parentObj[segment];
+      } else {
+        parentObj[segment] = {};
+        parentObj = parentObj[segment];
+      }
+    }
+
+    // Add the new property
+    if (parentObj[lastSegment]) {
+      parentObj[lastSegment][refProp] = ""; // Initialize with an empty string or any default value
+    } else {
+      parentObj[lastSegment] = { [refProp]: "" };
+    }
+
+    // Update the state
+    setJsonObjects(newJsonObjects);
+
+    // Convert updated JSON objects back to YAML
+    const updatedYaml = newJsonObjects
+      .map((item) => yamlStringify(item))
+      .join("---\n");
+    setYamlValue(updatedYaml);
   };
 
   return {
