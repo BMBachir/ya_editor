@@ -19,7 +19,7 @@ interface ResourceEditorProps {
   ) => void;
   handleAddRefProp: (
     resourceIndex: number,
-    path: string,
+    selectedKey: string,
     refProp: string
   ) => void;
 }
@@ -305,7 +305,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                                               onClick={() =>
                                                 handleAddRefProp(
                                                   index,
-                                                  currentPath,
+                                                  selectedKey,
                                                   refProp
                                                 )
                                               }

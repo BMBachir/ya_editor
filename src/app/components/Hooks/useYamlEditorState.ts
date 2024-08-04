@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { parseAllDocuments, stringify as yamlStringify } from "yaml";
 import { parse as jsonParse, stringify as jsonStringify } from "json5";
-import { updateNestedObject } from "../UtilityFunctions/utils";
+
 export const useYamlEditorState = () => {
   const [yamlValue, setYamlValue] = useState<string>("");
   const [jsonObjects, setJsonObjects] = useState<any[]>([]);
@@ -75,28 +75,28 @@ export const useYamlEditorState = () => {
 
   const handleAddRefProp = (
     resourceIndex: number,
-    path: string,
+    selectedKey: string, // Updated parameter name
     refProp: string
   ) => {
-    // Split the path into segments
-    const segments = path.split(".");
-    const lastSegment = segments.pop();
+    // Split the selectedKey into segments
+    const segments = selectedKey.split(".");
+    const lastSegment = segments.pop(); // The property to which we want to add new properties
 
     if (!lastSegment) {
-      console.error("Invalid path provided.");
+      console.error("Invalid selectedKey provided.");
       return;
     }
 
-    // Create a new object to avoid direct mutation
+    // Create a new object to avoid direct mutation of the existing state
     const newJsonObjects = [...jsonObjects];
     let parentObj = newJsonObjects[resourceIndex];
 
-    // Navigate to the parent object
+    // Navigate to the parent object where the property should be added
     for (const segment of segments) {
       if (parentObj[segment]) {
         parentObj = parentObj[segment];
       } else {
-        parentObj[segment] = {};
+        parentObj[segment] = {}; // Create a new object if it doesn't exist
         parentObj = parentObj[segment];
       }
     }
@@ -108,10 +108,10 @@ export const useYamlEditorState = () => {
       parentObj[lastSegment] = { [refProp]: "" };
     }
 
-    // Update the state
+    // Update the state with the new JSON objects
     setJsonObjects(newJsonObjects);
 
-    // Convert updated JSON objects back to YAML
+    // Convert updated JSON objects back to YAML and update the editor value
     const updatedYaml = newJsonObjects
       .map((item) => yamlStringify(item))
       .join("---\n");
