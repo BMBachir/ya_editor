@@ -16,11 +16,10 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
           containers: {
             name: "",
             image: "",
-            ports: [
-              {
-                containerPort: 80,
-              },
-            ],
+            ports: {
+              containerPort: 80,
+            },
+
             securityContext: {
               privileged: false,
             },
@@ -47,9 +46,7 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
       name: "",
     },
     spec: {
-      selector: {
-        app: "",
-      },
+      selector: "",
       ports: {
         protocol: "TCP",
         port: 80,
@@ -77,17 +74,15 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
       },
     },
     spec: {
-      containers: [
-        {
-          name: "",
-          image: "",
-          ports: [
-            {
-              containerPort: 80,
-            },
-          ],
-        },
-      ],
+      containers: {
+        name: "",
+        image: "",
+        ports: [
+          {
+            containerPort: 80,
+          },
+        ],
+      },
     },
   },
   Ingress: {

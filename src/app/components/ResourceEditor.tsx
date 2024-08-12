@@ -6,7 +6,7 @@ import { IoAddOutline } from "react-icons/io5";
 import { CiCircleRemove } from "react-icons/ci";
 import { k8sDefinitions } from "./data/definitions";
 import { getLastWord } from "./UtilityFunctions/utils";
-import { commonFields } from "./data/commonFields";
+import { simpleFields } from "./data/simpleFields ";
 interface ResourceEditorProps {
   jsonObjects: any[];
   expandedResourceIndex: number | null;
@@ -51,13 +51,6 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   handleInputChange,
   handleAddRefProp,
 }) => {
-  // Initialize activeTab with "Simple" as the default tab for each resource
-  const [activeTab, setActiveTab] = useState<{ [key: number]: string }>(
-    jsonObjects.reduce((acc, _, index) => {
-      acc[index] = "Simple";
-      return acc;
-    }, {} as { [key: number]: string })
-  );
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -329,40 +322,48 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
       .filter((element): element is JSX.Element => element !== null);
   };
 
-  const renderNestedObjects = (
-    obj: any,
-    index: number,
-    path = ""
-  ): JSX.Element[] => {
-    if (typeof obj !== "object" || obj === null) {
-      return [];
-    }
+  const renderSimpleView = (obj: any, index: number): JSX.Element[] => {
+    const kind = obj.kind || "";
+    const simpleFieldPaths = simpleFields[kind] || [];
 
-    return Object.keys(obj).map((key) => {
-      const value = obj[key];
-      const currentPath = path ? `${path}.${key}` : key;
-      const inputKey = `${index}-${currentPath}`;
-      const isNumber = isNumberKey(currentPath);
-      const isObject = typeof value === "object" && value !== null;
+    return simpleFieldPaths.map((path) => {
+      const parts = path.split(".");
+      let value = obj;
+      let isObject = false;
+
+      for (const part of parts) {
+        if (value && typeof value === "object") {
+          value = value[part];
+          isObject = typeof value === "object" && value !== null;
+        } else {
+          value = "";
+          break;
+        }
+      }
+
+      const inputKey = `${index}-${path}`;
+      const isNumber = isNumberKey(path);
 
       return (
         <div
           key={inputKey}
-          className="mb-2  border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full "
+          className="mb-2 border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full"
         >
           <label className="block text-sm font-medium text-white mb-2">
-            {key}
+            {parts[parts.length - 1]}
           </label>
-          <div className="">
+          <div>
             {isObject ? (
-              renderNestedObjects(value, index, currentPath)
+              <div className="text-xs font-mono text-irisBlueColor">
+                No items yet
+              </div>
             ) : isNumber ? (
               <input
                 id={`${inputKey}-value`}
                 type="number"
                 value={value === null ? "" : value}
                 onChange={(e) =>
-                  handleInputChange(index, currentPath, Number(e.target.value))
+                  handleFieldChange(index, path, Number(e.target.value))
                 }
                 className="input block w-full rounded-md"
               />
@@ -371,9 +372,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                 id={`${inputKey}-value`}
                 type="text"
                 value={value === null ? "" : value}
-                onChange={(e) =>
-                  handleInputChange(index, currentPath, e.target.value)
-                }
+                onChange={(e) => handleFieldChange(index, path, e.target.value)}
                 className="input block w-full rounded-md"
               />
             )}
@@ -383,12 +382,21 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
     });
   };
 
-  const renderSimpleView = (obj: any, index: number): JSX.Element[] => {
-    const metadata = obj.metadata || {};
-    const spec = obj.spec || {};
-    const combined = { ...metadata, ...spec };
+  const handleFieldChange = (index: number, path: string, newValue: any) => {
+    const parts = path.split(".");
+    const updatedObj = { ...jsonObjects[index] };
 
-    return renderNestedObjects(combined, index);
+    let obj: any = updatedObj;
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (obj[parts[i]] === undefined) {
+        obj[parts[i]] = {}; // Create empty object if undefined
+      }
+      obj = obj[parts[i]];
+    }
+
+    obj[parts[parts.length - 1]] = newValue;
+
+    handleInputChange(index, path, newValue);
   };
 
   return (
