@@ -331,6 +331,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
       let value = obj;
       let isObject = false;
 
+      // Traverse the object to find the value at the specified path
       for (const part of parts) {
         if (value && typeof value === "object") {
           value = value[part];
@@ -344,6 +345,75 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
       const inputKey = `${index}-${path}`;
       const isNumber = isNumberKey(path);
 
+      // Handling key-value pairs (e.g., metadata.labels)
+      if (
+        typeof value === "object" &&
+        value !== null &&
+        !Array.isArray(value)
+      ) {
+        return (
+          <div
+            key={inputKey}
+            className="mb-2 border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full"
+          >
+            <label className="block text-sm font-medium text-white mb-2">
+              {parts[parts.length - 1]}
+            </label>
+            <div>
+              {Object.entries(value).map(([key, val]) => (
+                <div
+                  key={`${inputKey}-${key}`}
+                  className="flex items-center gap-2 mb-2"
+                >
+                  <input
+                    type="text"
+                    value={key}
+                    className="input block w-1/2 rounded-md"
+                  />
+                  <input
+                    type="text"
+                    value={val === null ? "" : String(val)}
+                    onChange={(e) =>
+                      handleFieldChange(index, `${path}.${key}`, e.target.value)
+                    }
+                    className="input block w-1/2 rounded-md"
+                  />
+                </div>
+              ))}
+              <button
+                onClick={() => handleAddNewLabel(index, path)}
+                className="mt-2 text-sm font-medium text-primaryColor bg-backgroundColor py-2 px-4 rounded-lg hover:bg-hoverColor"
+              >
+                Add Label
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // If no labels exist, show a button to add the first label
+      if (path.endsWith("labels") && (!value || typeof value !== "object")) {
+        return (
+          <div
+            key={inputKey}
+            className="mb-2 border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full"
+          >
+            <label className="block text-sm font-medium text-white mb-2">
+              {parts[parts.length - 1]}
+            </label>
+            <div>
+              <button
+                onClick={() => handleAddNewLabel(index, path)}
+                className="mt-2 text-sm font-medium text-primaryColor bg-backgroundColor py-2 px-4 rounded-lg hover:bg-hoverColor"
+              >
+                Add Label
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // Handling non-object fields
       return (
         <div
           key={inputKey}
@@ -371,7 +441,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
               <input
                 id={`${inputKey}-value`}
                 type="text"
-                value={value === null ? "" : value}
+                value={value === null ? "" : String(value)}
                 onChange={(e) => handleFieldChange(index, path, e.target.value)}
                 className="input block w-full rounded-md"
               />
@@ -380,6 +450,15 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
         </div>
       );
     });
+  };
+
+  // Function to handle adding a new label
+  const handleAddNewLabel = (index: number, path: string) => {
+    const newLabelKey = prompt("Enter the key for the new label:");
+    if (!newLabelKey) return;
+
+    const updatedPath = `${path}.${newLabelKey}`;
+    handleFieldChange(index, updatedPath, "");
   };
 
   const handleFieldChange = (index: number, path: string, newValue: any) => {
