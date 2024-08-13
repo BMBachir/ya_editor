@@ -60,9 +60,9 @@ const YamlEditor: React.FC = () => {
       <div className="flex flex-col md:flex-row flex-1 ">
         <div className="flex-1 overflow-auto custom-scrollbar">
           <div className="flex flex-col min-h-screen bg-backgroundColor text-white">
-            <div className="mt-16">
-              <Stepper />
-            </div>
+            {/*<div className="mt-16">
+                <Stepper />
+            </div>*/}
             <div className="flex flex-col md:flex-row flex-1 mt-7">
               {/* Left Column */}
               <div className="bg-backgroundColor p-6 w-full md:w-1/3 flex flex-col rounded-lg gap-6 overflow-auto">
