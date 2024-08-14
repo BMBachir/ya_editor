@@ -118,6 +118,38 @@ export const useYamlEditorState = () => {
     setYamlValue(updatedYaml);
   };
 
+  const handleDeleteLabel = (index: number, path: string, key: string) => {
+    const parts = path.split(".");
+    let updatedObj = { ...jsonObjects[index] }; // Clone the object
+
+    let obj: any = updatedObj;
+    for (let i = 0; i < parts.length - 1; i++) {
+      obj = obj[parts[i]];
+
+      // If at any point the object path doesn't exist, exit early
+      if (obj === undefined || obj === null) {
+        return;
+      }
+    }
+
+    // Delete the specific key from the labels object
+    if (obj && typeof obj === "object") {
+      delete obj[parts[parts.length - 1]][key];
+    }
+
+    // Update the state with the modified object
+    const updatedJsonObjects = [...jsonObjects];
+    updatedJsonObjects[index] = updatedObj;
+
+    setJsonObjects(updatedJsonObjects);
+
+    // Convert the updated JSON objects back to YAML and update the editor value
+    const updatedYaml = updatedJsonObjects
+      .map((item) => yamlStringify(item))
+      .join("---\n");
+    setYamlValue(updatedYaml);
+  };
+
   return {
     yamlValue,
     setYamlValue,
@@ -132,5 +164,6 @@ export const useYamlEditorState = () => {
     handleClearYaml,
     handleEditorChange,
     handleAddRefProp,
+    handleDeleteLabel,
   };
 };

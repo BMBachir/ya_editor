@@ -7,7 +7,7 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
     metadata: {
       name: "Bachir",
       namespace: "default",
-      labels: "",
+      labels: {},
     },
     spec: {
       replicas: 1,

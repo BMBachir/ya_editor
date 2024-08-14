@@ -22,6 +22,7 @@ interface ResourceEditorProps {
     selectedKey: string,
     refProp: string
   ) => void;
+  handleDeleteLabel: (index: number, path: string, key: string) => void;
 }
 
 interface Property {
@@ -50,6 +51,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   handleDeleteResource,
   handleInputChange,
   handleAddRefProp,
+  handleDeleteLabel,
 }) => {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -136,9 +138,9 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
         return (
           <div
             key={inputKey}
-            className="mb-2 flex flex-col transition-all duration-900 "
+            className="mb-2 flex flex-col transition-all duration-900 mr-2"
           >
-            <div className="flex items-center justify-between gap-5 mt-1 border border-opacity-30 hover:bg-backgroundColor border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full">
+            <div className="flex items-center justify-between gap-5 mt-1  border border-opacity-30 hover:bg-backgroundColor border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full">
               <div className="flex items-center gap-5 w-full">
                 <label
                   onClick={() => toggleExpand(currentPath)}
@@ -369,6 +371,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                     type="text"
                     value={key}
                     className="input block w-1/2 rounded-md"
+                    readOnly // Prevent editing the key directly
                   />
                   <input
                     type="text"
@@ -378,13 +381,18 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
                     }
                     className="input block w-1/2 rounded-md"
                   />
+                  <MdDeleteOutline
+                    className="cursor-pointer text-red-500"
+                    onClick={() => handleDeleteLabel(index, path, key)}
+                    size={20}
+                  />
                 </div>
               ))}
               <button
                 onClick={() => handleAddNewLabel(index, path)}
-                className="mt-2 text-sm font-medium text-primaryColor bg-backgroundColor py-2 px-4 rounded-lg hover:bg-hoverColor"
+                className="mt-2 text-sm font-medium text-primaryColor bg-backgroundColor py-2 px-4 rounded-lg hover:text-gray-200"
               >
-                Add Label
+                + Add
               </button>
             </div>
           </div>
@@ -396,7 +404,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
         return (
           <div
             key={inputKey}
-            className="mb-2 border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full"
+            className="mb-2  border border-opacity-30 border-cyan-900 rounded-lg pl-4 pr-10 py-3 w-full"
           >
             <label className="block text-sm font-medium text-white mb-2">
               {parts[parts.length - 1]}
@@ -404,9 +412,9 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
             <div>
               <button
                 onClick={() => handleAddNewLabel(index, path)}
-                className="mt-2 text-sm font-medium text-primaryColor bg-backgroundColor py-2 px-4 rounded-lg hover:bg-hoverColor"
+                className="mt-2 text-sm font-medium text-primaryColor bg-backgroundColor py-2 px-4 rounded-lg hover:text-white"
               >
-                Add Label
+                + Add
               </button>
             </div>
           </div>

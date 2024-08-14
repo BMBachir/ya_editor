@@ -3,7 +3,6 @@ import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { yaml } from "@codemirror/lang-yaml";
 import { draculaInit } from "@uiw/codemirror-theme-dracula";
-import { parseAllDocuments } from "yaml";
 import NavBar from "./NavBar";
 import Stepper from "./Stepper";
 import { useYamlEditorState } from "./Hooks/useYamlEditorState";
@@ -30,6 +29,7 @@ const YamlEditor: React.FC = () => {
     handleClearYaml,
     handleEditorChange,
     handleAddRefProp,
+    handleDeleteLabel,
   } = useYamlEditorState();
 
   const {
@@ -89,6 +89,7 @@ const YamlEditor: React.FC = () => {
                     handleDeleteResource={handleDeleteResource}
                     handleInputChange={handleInputChange}
                     handleAddRefProp={handleAddRefProp}
+                    handleDeleteLabel={handleDeleteLabel}
                   />
                 </div>
               </div>
