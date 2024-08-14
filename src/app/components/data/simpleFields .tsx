@@ -18,7 +18,6 @@ export const simpleFields: { [key: string]: string[] } = {
     "metadata.name",
     "metadata.namespace",
     "metadata.labels", // Adding labels
-    "spec.selector.matchLabels", // Selector match labels
     "spec.template.metadata.labels", // Template metadata labels
     "spec.template.spec.containers.name",
     "spec.template.spec.containers.image",
