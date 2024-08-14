@@ -38,6 +38,7 @@ const YamlEditor: React.FC = () => {
     toggleKindVisibility,
     handleDeleteResource,
     handleInputChange,
+    filterPropertiesRecursively,
   } = useResourceManagement(setYamlValue, setJsonObjects);
 
   const {
@@ -90,6 +91,7 @@ const YamlEditor: React.FC = () => {
                     handleInputChange={handleInputChange}
                     handleAddRefProp={handleAddRefProp}
                     handleDeleteLabel={handleDeleteLabel}
+                    filterPropertiesRecursively={filterPropertiesRecursively}
                   />
                 </div>
               </div>

@@ -23,6 +23,11 @@ interface ResourceEditorProps {
     refProp: string
   ) => void;
   handleDeleteLabel: (index: number, path: string, key: string) => void;
+  filterPropertiesRecursively: (
+    obj: any,
+    searchTerm: string,
+    path: string
+  ) => void;
 }
 
 interface Property {
@@ -52,6 +57,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   handleInputChange,
   handleAddRefProp,
   handleDeleteLabel,
+  filterPropertiesRecursively,
 }) => {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,38 +83,6 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
       newExpandedPaths.add(path);
     }
     setExpandedPaths(newExpandedPaths);
-  };
-
-  const filterPropertiesRecursively = (
-    obj: any,
-    searchTerm: string,
-    path = ""
-  ): string[] => {
-    const result: string[] = [];
-
-    if (typeof obj === "object" && obj !== null) {
-      for (const key of Object.keys(obj)) {
-        const value = obj[key];
-        const currentPath = path ? `${path}.${key}` : key;
-
-        if (key.toLowerCase().includes(searchTerm.toLowerCase())) {
-          result.push(currentPath);
-        }
-
-        if (typeof value === "object") {
-          const nestedResults = filterPropertiesRecursively(
-            value,
-            searchTerm,
-            currentPath
-          );
-          if (nestedResults.length > 0) {
-            result.push(...nestedResults);
-          }
-        }
-      }
-    }
-
-    return result;
   };
 
   const handleAddClick = (key: string) => {
