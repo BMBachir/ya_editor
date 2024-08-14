@@ -11,8 +11,8 @@ export const simpleFields: { [key: string]: string[] } = {
   Service: [
     "metadata.name",
     "metadata.namespace",
-    "metadata.labels", // Adding labels
     "spec.ports.port",
+    "spec.selector",
   ],
   Deployment: [
     "metadata.name",
