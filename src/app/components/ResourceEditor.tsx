@@ -436,7 +436,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
 
   // Function to handle adding a new label
   const handleAddNewLabel = (index: number, path: string) => {
-    const newLabelKey = prompt("Enter the key for the new label:");
+    const newLabelKey = prompt("Enter the name key :");
     if (!newLabelKey) return;
 
     const updatedPath = `${path}.${newLabelKey}`;
@@ -465,7 +465,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
       {jsonObjects.map((obj, index) => {
         const isExpanded = expandedResourceIndex === index;
         const kind = obj.kind || "";
-        const name = obj.metadata.name || "";
+        const name = obj.metadata?.name || ""; // Safely access metadata.name
 
         return (
           <div
@@ -507,7 +507,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
               <div className="p-4 transition-all duration-1000 border-t border-opacity-40 border-cyan-900">
                 <div className="tabs-container mb-4 ">
                   <div className="tabs  ">
-                    <div className=" border-b border-solid border-cyan-900 ">
+                    <div className=" border-b border-solid border-cyan-900 border-opacity-40 ">
                       <button
                         onClick={() => setTab("Simple")}
                         className={` ${

@@ -83,5 +83,15 @@ body {
     color: #98c379; /* String color */
   }
 
+  .custom-split .gutter {
+    background-color: #003342; /* Initial color of the gutter */
+    transition: background-color 0.3s ease;
+  }
+
+  .custom-split .gutter:hover {
+    background-color: #42a5f5; /* Color on hover */
+    cursor: ew-resize; /* Change the cursor to indicate resizability */
+  }
+
   /* Adjust other syntax highlighting colors as needed */
 }
