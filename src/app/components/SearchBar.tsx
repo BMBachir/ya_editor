@@ -55,16 +55,16 @@ const SearchBar: React.FC<SearchBarProps> = ({
               className="text-red-500 hover:bg-red-500 hover:bg-opacity-15 py-1 px-1 font-semibold rounded-md shadow-sm  transition-all duration-900"
               onClick={handleClearYaml}
             >
-              <MdClearAll className="h-6 w-6" />
+              <MdClearAll className="h-7 w-7" />
             </button>
             <button
               className="font-semibold rounded-md text-primaryColor hover:bg-primaryColor hover:bg-opacity-15 py-1 px-1 shadow-sm  transition-all duration-900"
               onClick={toggleModal}
             >
               {showSearch ? (
-                <IoRemove className="h-6 w-6" />
+                <IoRemove className="h-7 w-7" />
               ) : (
-                <IoAdd className="h-6 w-6" />
+                <IoAdd className="h-7 w-7" />
               )}
             </button>
           </div>

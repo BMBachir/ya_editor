@@ -4,15 +4,6 @@ import { updateNestedObject } from "../UtilityFunctions/utils";
 import { stringify as yamlStringify } from "yaml";
 import { simpleSchemas } from "../data/schemas";
 import yaml from "js-yaml";
-type ResourceProperties = {
-  [key: string]: {
-    type?: string;
-    items?: {
-      $ref?: string;
-    };
-    $ref?: string;
-  };
-};
 
 type JsonObject = {
   [key: string]: any;
@@ -75,7 +66,10 @@ export function useResourceManagement(
     setJsonObjects((prev) => {
       const updated = [...prev];
       updateNestedObject(updated[index], path, newValue);
-      setYamlValue(yamlStringify(updated));
+      const updatedYaml = updated
+        .map((item) => yamlStringify(item))
+        .join("---\n");
+      setYamlValue(updatedYaml);
       return updated;
     });
   };

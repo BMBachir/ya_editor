@@ -150,6 +150,24 @@ export const useYamlEditorState = () => {
     setYamlValue(updatedYaml);
   };
 
+  const handleInputChange = (index: number, path: string, newValue: any) => {
+    const parts = path.split(".");
+    const updatedObjects = [...jsonObjects]; // Copy the current state
+
+    let obj: any = updatedObjects[index];
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (obj[parts[i]] === undefined) {
+        obj[parts[i]] = {}; // Create empty object if undefined
+      }
+      obj = obj[parts[i]];
+    }
+
+    obj[parts[parts.length - 1]] = newValue;
+
+    // Update state with new jsonObjects array
+    setJsonObjects(updatedObjects);
+  };
+
   return {
     yamlValue,
     setYamlValue,
@@ -165,5 +183,6 @@ export const useYamlEditorState = () => {
     handleEditorChange,
     handleAddRefProp,
     handleDeleteLabel,
+    handleInputChange,
   };
 };
