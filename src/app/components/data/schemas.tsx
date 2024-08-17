@@ -79,11 +79,9 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
       containers: {
         name: "",
         image: "",
-        ports: [
-          {
-            containerPort: 80,
-          },
-        ],
+        ports: {
+          containerPort: 80,
+        },
       },
     },
   },
@@ -94,27 +92,25 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
       name: "",
     },
     spec: {
-      rules: [
-        {
-          host: "",
-          http: {
-            paths: [
-              {
-                path: "/",
-                pathType: "Prefix",
-                backend: {
-                  service: {
-                    name: "",
-                    port: {
-                      number: 80,
-                    },
+      rules: {
+        host: "",
+        http: {
+          paths: [
+            {
+              path: "/",
+              pathType: "Prefix",
+              backend: {
+                service: {
+                  name: "",
+                  port: {
+                    number: 80,
                   },
                 },
               },
-            ],
-          },
+            },
+          ],
         },
-      ],
+      },
     },
   },
   PersistentVolumeClaim: {
@@ -124,7 +120,7 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
       name: "",
     },
     spec: {
-      accessModes: ["ReadWriteOnce"],
+      accessModes: "ReadWriteOnce",
       resources: {
         requests: {
           storage: "1Gi",
@@ -146,13 +142,11 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
       namespace: "",
       name: "",
     },
-    rules: [
-      {
-        apiGroups: "",
-        resources: "",
-        verbs: "",
-      },
-    ],
+    rules: {
+      apiGroups: "",
+      resources: "",
+      verbs: "",
+    },
   },
   RoleBinding: {
     apiVersion: "rbac.authorization.k8s.io/v1",
@@ -161,13 +155,12 @@ export const simpleSchemas: { [key: string]: { [key: string]: any } } = {
       name: "",
       namespace: "",
     },
-    subjects: [
-      {
-        kind: "User",
-        name: "",
-        apiGroup: "rbac.authorization.k8s.io",
-      },
-    ],
+    subjects: {
+      kind: "User",
+      name: "",
+      apiGroup: "rbac.authorization.k8s.io",
+    },
+
     roleRef: {
       kind: "Role",
       name: "",
