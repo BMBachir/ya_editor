@@ -106,6 +106,36 @@ export function useResourceManagement(
     return result;
   };
 
+  // Handle deleting a specific label within a resource
+  const handleDeleteLabel = (index: number, label: string) => {
+    setJsonObjects((prev) => {
+      const updated = [...prev];
+      if (updated[index][label]) {
+        delete updated[index][label];
+      }
+      const updatedYaml = updated
+        .map((item) => yamlStringify(item))
+        .join("---\n");
+      setYamlValue(updatedYaml);
+      return updated;
+    });
+  };
+
+  // Handle adding a reference property to a resource
+  const handleAddRefProp = (index: number, refProp: string) => {
+    setJsonObjects((prev) => {
+      const updated = [...prev];
+      if (!updated[index][refProp]) {
+        updated[index][refProp] = ""; // or some default value
+      }
+      const updatedYaml = updated
+        .map((item) => yamlStringify(item))
+        .join("---\n");
+      setYamlValue(updatedYaml);
+      return updated;
+    });
+  };
+
   return {
     expandedResourceIndex,
     handleAddResource,
@@ -114,5 +144,7 @@ export function useResourceManagement(
     handleInputChange,
     handleKeyChange,
     filterPropertiesRecursively,
+    handleDeleteLabel,
+    handleAddRefProp,
   };
 }

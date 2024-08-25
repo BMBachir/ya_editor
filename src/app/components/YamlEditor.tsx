@@ -124,7 +124,7 @@ const YamlEditor: React.FC = () => {
 
           {/* Right Column */}
           <div className="p-4 bg-backgrounColor2  ">
-            <div className="p-4 bg-backgrounColor2  overflow-auto ">
+            <div className="p-2 bg-backgrounColor2  overflow-auto ">
               {/* Tabs Header */}
               <div className="flex items-center justify-start border-gray-300">
                 <div className="flex ">
