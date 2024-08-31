@@ -57,7 +57,6 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   handleInputChange,
   handleAddRefProp,
   handleDeleteLabel,
-  filterPropertiesRecursively,
 }) => {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -65,6 +64,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   const [selectedKey, setSelectedKey] = useState<string>("");
   const [nestedProperties, setNestedProperties] = useState<string[]>([]);
   const [tab, setTab] = useState("Simple");
+
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
