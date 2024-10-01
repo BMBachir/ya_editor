@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosArrowForward, IoIosArrowDown } from "react-icons/io";
 import { isNumberKey } from "./UtilityFunctions/utils";
@@ -57,6 +57,7 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   handleInputChange,
   handleAddRefProp,
   handleDeleteLabel,
+  filterPropertiesRecursively,
 }) => {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,10 +65,16 @@ const ResourceEditor: React.FC<ResourceEditorProps> = ({
   const [selectedKey, setSelectedKey] = useState<string>("");
   const [nestedProperties, setNestedProperties] = useState<string[]>([]);
   const [tab, setTab] = useState("Simple");
+  const [resources, setResources] = useState<{ tabId: string; content: any }[]>(
+    jsonObjects.map((obj, index) => ({
+      tabId: `Tab-${index + 1}`,
+      content: obj,
+    }))
+  );
 
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
+  const toggleModal = useCallback(() => {
+    setIsModalOpen((preValue) => !preValue);
+  }, []);
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {

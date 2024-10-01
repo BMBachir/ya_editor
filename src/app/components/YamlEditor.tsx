@@ -16,7 +16,16 @@ import { githubDark, githubDarkInit } from "@uiw/codemirror-theme-github";
 import Split from "react-split";
 import { IoAddOutline, IoClose } from "react-icons/io5";
 import MultiTabEditor from "./MultiTabEditor";
+import useMultiTabEditor from "./Hooks/useMultiTabEditor";
+
 const YamlEditor: React.FC = () => {
+  interface MultiTabEditorProps {
+    yamlValue: string; // Represents the initial content of the first tab
+    setYamlValue: (value: string) => void; // Function to update YAML value in parent
+  }
+  const [yamlByTab, setYamlByTab] = useState<Record<number, string>>({});
+  const [activeTabId, setActiveTabId] = useState<number>(1);
+
   const {
     yamlValue,
     setYamlValue,
@@ -29,7 +38,6 @@ const YamlEditor: React.FC = () => {
     handleYamlToJson,
     handleJsonToYaml,
     handleClearYaml,
-    handleEditorChange,
     handleAddRefProp,
     handleDeleteLabel,
   } = useYamlEditorState();
@@ -56,6 +64,16 @@ const YamlEditor: React.FC = () => {
   } = useSearch((resourceType: string) => {
     handleAddResource(resourceType);
   });
+
+  // Use the multi-tab editor hook
+  const {
+    tabs,
+    activeTab,
+    addTab,
+    handleTabChange,
+    updateTabContent,
+    removeTab,
+  } = useMultiTabEditor(yamlValue, setYamlValue); // Pass down yamlValue and setYamlValue// Pass down yamlValue and setYamlValue
 
   return (
     <div className="flex">
@@ -99,7 +117,16 @@ const YamlEditor: React.FC = () => {
 
           {/* Right Column */}
           <div className="p-4 bg-backgrounColor2  ">
-            <MultiTabEditor yamlValue={yamlValue} setYamlValue={setYamlValue} />
+            <MultiTabEditor
+              tabs={tabs}
+              activeTab={activeTab}
+              addTab={addTab}
+              handleTabChange={handleTabChange}
+              updateTabContent={updateTabContent}
+              removeTab={removeTab}
+              yamlValue={yamlValue}
+              setYamlValue={setYamlValue}
+            />
             <div className="flex items-center justify-center gap-5 mt-6">
               <FileUpload
                 fileInputRef={fileInputRef}

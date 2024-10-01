@@ -47,7 +47,8 @@
     "react-dom": "^18",
     "react-icons": "^5.2.1",
     "react-split": "^2.0.14",
-    "styled-components": "^6.1.11"
+    "styled-components": "^6.1.11",
+    "yaml": "^2.5.1"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",

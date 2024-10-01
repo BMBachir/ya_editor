@@ -110,7 +110,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         className="cursor-pointer px-4 py-3 text-sm hover:bg-gray-700"
                         onMouseDown={() => handleSuggestionClick(suggestion)}
                       >
-                        <span>{getLastWord(suggestion)}</span>
+                        <span>{suggestion}</span>
                       </li>
                     ))}
                   </ul>

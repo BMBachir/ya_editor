@@ -38,6 +38,7 @@ export function useResourceManagement(
       return updated;
     });
   };
+
   const toggleKindVisibility = (index: number) => {
     setExpandedResourceIndex((prevIndex) =>
       prevIndex === index ? null : index

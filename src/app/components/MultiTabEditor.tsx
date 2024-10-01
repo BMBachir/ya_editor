@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { yaml } from "@codemirror/lang-yaml";
 import { IoAddOutline, IoClose } from "react-icons/io5";
@@ -10,81 +10,27 @@ interface Tab {
   title: string;
   content: string; // Each tab manages its own content
 }
-
 interface MultiTabEditorProps {
   yamlValue: string; // Represents the content of the active tab or the combined content
-  setYamlValue: (value: string) => void;
+  setYamlValue: React.Dispatch<React.SetStateAction<string>>; // Function to update YAML value in parent
+  tabs: Tab[]; // Array of tabs
+  activeTab: number; // Currently active tab ID
+  addTab: () => void; // Function to add a new tab
+  handleTabChange: (id: number) => void; // Function to change active tab
+  updateTabContent: (value: string) => void; // Function to update content of the active tab
+  removeTab: (id: number) => void; // Function to remove a tab
 }
 
 const MultiTabEditor: React.FC<MultiTabEditorProps> = ({
   yamlValue,
   setYamlValue,
+  tabs,
+  activeTab,
+  addTab,
+  handleTabChange,
+  updateTabContent,
+  removeTab,
 }) => {
-  const [tabs, setTabs] = useState<Tab[]>([
-    { id: 1, title: "Tab 1", content: yamlValue }, // Initialize with yamlValue
-  ]);
-  const [activeTab, setActiveTab] = useState<number>(1);
-  const [nextTabId, setNextTabId] = useState<number>(2);
-
-  useEffect(() => {
-    // Load the content of the active tab into the global YAML state
-    const activeTabContent = tabs.find((tab) => tab.id === activeTab)?.content;
-    if (activeTabContent !== undefined) {
-      setYamlValue(activeTabContent);
-    }
-  }, [activeTab, tabs, setYamlValue]);
-
-  const addTab = () => {
-    // Save the current active tab's content before adding a new tab
-    setTabs(
-      tabs.map((tab) =>
-        tab.id === activeTab ? { ...tab, content: yamlValue } : tab
-      )
-    );
-
-    const newTab: Tab = {
-      id: nextTabId,
-      title: `Tab ${nextTabId}`,
-      content: "", // New tab starts with empty content
-    };
-    setTabs((prevTabs) => [...prevTabs, newTab]);
-    setActiveTab(nextTabId);
-    setNextTabId(nextTabId + 1);
-    setYamlValue(""); // Clear the editor content for the new tab
-  };
-
-  const handleTabChange = (id: number) => {
-    // Save the current active tab's content before switching tabs
-    setTabs(
-      tabs.map((tab) =>
-        tab.id === activeTab ? { ...tab, content: yamlValue } : tab
-      )
-    );
-    setActiveTab(id); // Switch to the new tab
-  };
-
-  const updateTabContent = (value: string) => {
-    // Update the content of the currently active tab in its own state
-    setTabs(
-      tabs.map((tab) =>
-        tab.id === activeTab ? { ...tab, content: value } : tab
-      )
-    );
-    // Update the global YAML state with the active tab's content
-    setYamlValue(value);
-  };
-
-  const removeTab = (id: number) => {
-    const updatedTabs = tabs.filter((tab) => tab.id !== id);
-    setTabs(updatedTabs);
-    if (activeTab === id && updatedTabs.length > 0) {
-      setActiveTab(updatedTabs[0].id);
-      setYamlValue(updatedTabs[0].content);
-    } else if (updatedTabs.length === 0) {
-      setYamlValue(""); // Clear YAML state if no tabs are left
-    }
-  };
-
   return (
     <div className="p-4 bg-backgrounColor2">
       <div className="p-2 bg-backgrounColor2 overflow-auto">
@@ -93,18 +39,14 @@ const MultiTabEditor: React.FC<MultiTabEditorProps> = ({
             {tabs.map((tab) => (
               <div
                 key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
                 className={`relative flex items-center py-2 px-4 mx-1 rounded-lg transition-colors duration-300 ${
                   tab.id === activeTab
                     ? "bg-backgroundColor text-gray-200 shadow-md"
                     : "bg-backgroundColor text-gray-200 hover:bg-[#121f2b]"
                 }`}
               >
-                <button
-                  className="flex-1"
-                  onClick={() => handleTabChange(tab.id)}
-                >
-                  {tab.title}
-                </button>
+                <button className="flex-1">{tab.title}</button>
                 {tab.id === activeTab && (
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-primaryColor bg-opacity-50 rounded-b-lg"></div>
                 )}
@@ -150,7 +92,7 @@ const MultiTabEditor: React.FC<MultiTabEditorProps> = ({
         })}
         extensions={[yaml()]}
         onChange={(value) => {
-          updateTabContent(value); // Update the content in the current tab's state
+          updateTabContent(value);
         }}
         className="w-full"
         lang="yaml"
