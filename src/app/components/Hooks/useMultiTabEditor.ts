@@ -1,28 +1,53 @@
-// useMultiTabEditor.ts
 import { useState, useEffect } from "react";
 
 interface Tab {
   id: number;
   title: string;
-  content: string;
+  content?: string; // Each tab manages its own content
+}
+
+interface TabState {
+  id: number;
+  title: string;
+  value?: string; // Value to hold content for editors
 }
 
 const useMultiTabEditor = (
-  initialYamlValue: string,
-  setYamlValue: React.Dispatch<React.SetStateAction<string>>
+  yamlValues: Tab[],
+  setYamlValue: (tabId: number, title: string, value: string) => void
 ) => {
-  const [tabs, setTabs] = useState<Tab[]>([
-    { id: 1, title: "Tab 1", content: initialYamlValue },
+  /* State variables */
+  const [tabs, setTabs] = useState<TabState[]>([
+    { id: 1, title: "Tab 1", value: yamlValues[0]?.content || "" },
   ]);
   const [activeTab, setActiveTab] = useState<number>(1);
   const [nextTabId, setNextTabId] = useState<number>(2);
 
-  useEffect(() => {
-    const activeTabContent = tabs.find((tab) => tab.id === activeTab)?.content;
-    if (activeTabContent !== undefined) {
-      setYamlValue(activeTabContent);
+  /* Functions */
+
+  const removeTab = (id: number) => {
+    const updatedTabs = tabs.filter((tab) => tab.id !== id);
+    setTabs(updatedTabs);
+
+    // Check if the removed tab was active and update activeTab accordingly
+    if (activeTab === id && updatedTabs.length > 0) {
+      const newActiveTab = updatedTabs[0].id; // Set the first remaining tab as active
+      setActiveTab(newActiveTab);
+      const newActiveTabContent = updatedTabs[0].value || "";
+      setYamlValue(newActiveTab, updatedTabs[0].title, newActiveTabContent);
+    } else if (updatedTabs.length === 0) {
+      setActiveTab(1); // Reset to first tab if no tabs left
+      setYamlValue(1, "Tab 1", ""); // Clear value if no tabs left
     }
-  }, [activeTab, tabs, setYamlValue]);
+  };
+
+  /* Update YAML value when active tab changes */
+  useEffect(() => {
+    const activeTabContent = tabs.find((tab) => tab.id === activeTab)?.value;
+    if (activeTabContent !== undefined) {
+      setYamlValue(activeTab, `Tab ${activeTab}`, activeTabContent);
+    }
+  }, []);
 
   const addTab = () => {
     // Save current active tab's content before adding a new tab
@@ -31,7 +56,7 @@ const useMultiTabEditor = (
         tab.id === activeTab
           ? {
               ...tab,
-              content: tabs.find((t) => t.id === activeTab)?.content || "",
+              value: tabs.find((t) => t.id === activeTab)?.value || "", // Save current content
             }
           : tab
       )
@@ -40,13 +65,13 @@ const useMultiTabEditor = (
     const newTab: Tab = {
       id: nextTabId,
       title: `Tab ${nextTabId}`,
-      content: "", // New tab starts with empty content
+      content: "", // Initially empty content
     };
 
-    setTabs((prevTabs) => [...prevTabs, newTab]);
-    setActiveTab(nextTabId);
-    setNextTabId(nextTabId + 1);
-    setYamlValue(""); // Clear the editor content for the new tab
+    setTabs((prevTabs) => [...prevTabs, { ...newTab, value: "" }]); // Add new tab
+    setActiveTab(nextTabId); // Switch to the new tab
+    setNextTabId(nextTabId + 1); // Increment next tab ID
+    setYamlValue(nextTabId, `Tab ${nextTabId}`, ""); // Initialize new tab's value
   };
 
   const handleTabChange = (id: number) => {
@@ -56,45 +81,30 @@ const useMultiTabEditor = (
         tab.id === activeTab
           ? {
               ...tab,
-              content: tabs.find((t) => t.id === activeTab)?.content || "",
+              value: tabs.find((t) => t.id === activeTab)?.value || "", // Save current content
             }
           : tab
       )
     );
 
-    setActiveTab(id);
+    setActiveTab(id); // Switch to the new tab
   };
 
-  const updateTabContent = (value: string) => {
+  // Handle content changes in the active tab
+  const updateTabContent = (id: number, content: string) => {
     setTabs((prevTabs) =>
-      prevTabs.map((tab) =>
-        tab.id === activeTab ? { ...tab, content: value } : tab
-      )
+      prevTabs.map((tab) => (tab.id === id ? { ...tab, value: content } : tab))
     );
-
-    // Update yamlValue for display in parent component
-    setYamlValue(value);
-  };
-
-  const removeTab = (id: number) => {
-    const updatedTabs = tabs.filter((tab) => tab.id !== id);
-    setTabs(updatedTabs);
-
-    if (activeTab === id && updatedTabs.length > 0) {
-      setActiveTab(updatedTabs[0].id);
-      setYamlValue(updatedTabs[0].content);
-    } else if (updatedTabs.length === 0) {
-      setYamlValue("");
-    }
   };
 
   return {
     tabs,
+    setTabs,
     activeTab,
     addTab,
     handleTabChange,
-    updateTabContent,
     removeTab,
+    updateTabContent, // Export function to update content
   };
 };
 

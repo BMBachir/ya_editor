@@ -1,9 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import CodeMirror from "@uiw/react-codemirror";
-import { yaml } from "@codemirror/lang-yaml";
 import NavBar from "./NavBar";
-import Stepper from "./Stepper";
 import { useYamlEditorState } from "./Hooks/useYamlEditorState";
 import { useResourceManagement } from "./Hooks/useResourceManagement";
 import { useSearch } from "./Hooks/useSearch";
@@ -11,36 +8,51 @@ import ResourceEditor from "./ResourceEditor";
 import FileUpload from "./FileUpload";
 import YamlJsonToggle from "./YamlJsonToggle";
 import SearchBar from "./SearchBar";
-import { tags as t } from "@lezer/highlight";
-import { githubDark, githubDarkInit } from "@uiw/codemirror-theme-github";
 import Split from "react-split";
-import { IoAddOutline, IoClose } from "react-icons/io5";
 import MultiTabEditor from "./MultiTabEditor";
 import useMultiTabEditor from "./Hooks/useMultiTabEditor";
 
 const YamlEditor: React.FC = () => {
-  interface MultiTabEditorProps {
-    yamlValue: string; // Represents the initial content of the first tab
-    setYamlValue: (value: string) => void; // Function to update YAML value in parent
+  interface Tab {
+    id: number;
+    title: string;
+    content?: string;
   }
-  const [yamlByTab, setYamlByTab] = useState<Record<number, string>>({});
-  const [activeTabId, setActiveTabId] = useState<number>(1);
+  const [yamlValues, setYamlValues] = useState<Tab[]>([
+    { id: 1, title: "", content: "" },
+  ]);
+  // Function to set YAML value for a specific tab
+  const setYamlValue = (tabId: number, title: string, value: string) => {
+    setYamlValues((prev) =>
+      prev.map((tab) =>
+        tab.id === tabId ? { ...tab, title: title, content: value } : tab
+      )
+    );
+  };
 
   const {
-    yamlValue,
-    setYamlValue,
+    tabs,
+    setTabs,
+    activeTab,
+    addTab,
+    handleTabChange,
+    removeTab,
+    updateTabContent,
+  } = useMultiTabEditor(yamlValues, setYamlValue);
+  const {
     jsonObjects,
     setJsonObjects,
     isYamlToJson,
     setIsYamlToJson,
     fileInputRef,
     handleFileChange,
-    handleYamlToJson,
-    handleJsonToYaml,
-    handleClearYaml,
-    handleAddRefProp,
+    //handleYamlToJson,
+    //handleJsonToYaml,
     handleDeleteLabel,
-  } = useYamlEditorState();
+    handleClearYaml,
+    handleEditorChange,
+    handleAddRefProp,
+  } = useYamlEditorState(activeTab, tabs, setTabs, yamlValues, setYamlValue);
 
   const {
     expandedResourceIndex,
@@ -49,7 +61,7 @@ const YamlEditor: React.FC = () => {
     handleDeleteResource,
     handleInputChange,
     filterPropertiesRecursively,
-  } = useResourceManagement(setYamlValue, setJsonObjects);
+  } = useResourceManagement(setYamlValue, setJsonObjects, activeTab, setTabs);
 
   const {
     searchTerm,
@@ -64,16 +76,6 @@ const YamlEditor: React.FC = () => {
   } = useSearch((resourceType: string) => {
     handleAddResource(resourceType);
   });
-
-  // Use the multi-tab editor hook
-  const {
-    tabs,
-    activeTab,
-    addTab,
-    handleTabChange,
-    updateTabContent,
-    removeTab,
-  } = useMultiTabEditor(yamlValue, setYamlValue); // Pass down yamlValue and setYamlValue// Pass down yamlValue and setYamlValue
 
   return (
     <div className="flex">
@@ -122,22 +124,22 @@ const YamlEditor: React.FC = () => {
               activeTab={activeTab}
               addTab={addTab}
               handleTabChange={handleTabChange}
-              updateTabContent={updateTabContent}
               removeTab={removeTab}
-              yamlValue={yamlValue}
-              setYamlValue={setYamlValue}
+              yamlValues={yamlValues}
+              updateTabContent={updateTabContent}
+              handleEditorChange={handleEditorChange}
             />
             <div className="flex items-center justify-center gap-5 mt-6">
-              <FileUpload
+              {/**   <FileUpload
                 fileInputRef={fileInputRef}
-                handleFileChange={handleFileChange}
+                //handleFileChange={handleFileChange}
               />
               <YamlJsonToggle
                 isYamlToJson={isYamlToJson}
                 setIsYamlToJson={setIsYamlToJson}
-                handleYamlToJson={handleYamlToJson}
-                handleJsonToYaml={handleJsonToYaml}
-              />
+                //handleYamlToJson={handleYamlToJson}
+                //handleJsonToYaml={handleJsonToYaml}
+              /> */}
             </div>
           </div>
         </Split>

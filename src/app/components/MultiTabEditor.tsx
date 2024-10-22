@@ -8,32 +8,39 @@ import { tags as t } from "@lezer/highlight";
 interface Tab {
   id: number;
   title: string;
-  content: string; // Each tab manages its own content
+  content?: string; // Each tab manages its own content
 }
+
+interface TabState {
+  id: number;
+  title: string;
+  value?: string; // Each tab's content
+}
+
 interface MultiTabEditorProps {
-  yamlValue: string; // Represents the content of the active tab or the combined content
-  setYamlValue: React.Dispatch<React.SetStateAction<string>>; // Function to update YAML value in parent
-  tabs: Tab[]; // Array of tabs
+  yamlValues: Tab[]; // Represents the content of the active tab or the combined content
+  tabs: TabState[]; // Array of tabs
   activeTab: number; // Currently active tab ID
   addTab: () => void; // Function to add a new tab
   handleTabChange: (id: number) => void; // Function to change active tab
-  updateTabContent: (value: string) => void; // Function to update content of the active tab
   removeTab: (id: number) => void; // Function to remove a tab
+  updateTabContent: (id: number, content: string) => void; // Function to update content of a specific tab
+  handleEditorChange: (id: number, newValue: string) => void;
 }
 
 const MultiTabEditor: React.FC<MultiTabEditorProps> = ({
-  yamlValue,
-  setYamlValue,
   tabs,
   activeTab,
   addTab,
   handleTabChange,
-  updateTabContent,
   removeTab,
+  handleEditorChange,
 }) => {
+  const valueActiveTab = tabs.find((tab) => tab.id === activeTab)?.value || "";
+
   return (
-    <div className="p-4 bg-backgrounColor2">
-      <div className="p-2 bg-backgrounColor2 overflow-auto">
+    <div className="p-4 bg-backgroundColor2">
+      <div className="p-2 bg-backgroundColor2 overflow-auto">
         <div className="flex items-center justify-start border-gray-300">
           <div className="flex">
             {tabs.map((tab) => (
@@ -74,13 +81,13 @@ const MultiTabEditor: React.FC<MultiTabEditorProps> = ({
       </div>
 
       <CodeMirror
-        value={yamlValue}
+        value={valueActiveTab}
         height="680px"
         theme={githubDarkInit({
           settings: {
             gutterBackground: "#05141C",
             background: "#05141C",
-            fontSize: "15px",
+            fontSize: "19px",
             caret: "#c6c6c6",
             fontFamily: "monospace",
           },
@@ -91,11 +98,11 @@ const MultiTabEditor: React.FC<MultiTabEditorProps> = ({
           ],
         })}
         extensions={[yaml()]}
-        onChange={(value) => {
-          updateTabContent(value);
-        }}
         className="w-full"
         lang="yaml"
+        onChange={(value) => {
+          handleEditorChange(activeTab, value);
+        }}
       />
     </div>
   );

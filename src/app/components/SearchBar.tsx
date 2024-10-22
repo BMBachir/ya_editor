@@ -109,6 +109,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                         key={index}
                         className="cursor-pointer px-4 py-3 text-sm hover:bg-gray-700"
                         onMouseDown={() => handleSuggestionClick(suggestion)}
+                        onClick={toggleModal}
                       >
                         <span>{suggestion}</span>
                       </li>
