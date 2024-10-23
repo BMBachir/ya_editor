@@ -568,5 +568,5 @@ const ResourceEditor: React.FC<ResourceEditorProps> = React.memo(
     );
   }
 );
-
+ResourceEditor.displayName = "ResourceEditor";
 export default ResourceEditor;

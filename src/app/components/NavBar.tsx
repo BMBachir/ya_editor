@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useCallback, use } from "react";
+import React, { useState, useCallback } from "react";
 import Link from "next/link";
 import { GiPrayingMantis } from "react-icons/gi";
 import { LuHome } from "react-icons/lu";
