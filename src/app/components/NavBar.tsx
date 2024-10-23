@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useCallback, use } from "react";
 import Link from "next/link";
 import { GiPrayingMantis } from "react-icons/gi";
 import { LuHome } from "react-icons/lu";
@@ -9,9 +9,9 @@ import { LuArrowRightFromLine } from "react-icons/lu";
 const NavBar = () => {
   const [isNavVisible, setIsNavVisible] = useState(false);
 
-  const toggleNavVisibility = () => {
+  const toggleNavVisibility = useCallback(() => {
     setIsNavVisible(!isNavVisible);
-  };
+  }, [isNavVisible]);
 
   return (
     <div

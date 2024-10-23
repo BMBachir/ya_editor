@@ -8,23 +8,23 @@ import { tags as t } from "@lezer/highlight";
 interface Tab {
   id: number;
   title: string;
-  content?: string; // Each tab manages its own content
+  content?: string;
 }
 
 interface TabState {
   id: number;
   title: string;
-  value?: string; // Each tab's content
+  value?: string;
 }
 
 interface MultiTabEditorProps {
-  yamlValues: Tab[]; // Represents the content of the active tab or the combined content
-  tabs: TabState[]; // Array of tabs
-  activeTab: number; // Currently active tab ID
-  addTab: () => void; // Function to add a new tab
-  handleTabChange: (id: number) => void; // Function to change active tab
-  removeTab: (id: number) => void; // Function to remove a tab
-  updateTabContent: (id: number, content: string) => void; // Function to update content of a specific tab
+  yamlValues: Tab[];
+  tabs: TabState[];
+  activeTab: number;
+  addTab: () => void;
+  handleTabChange: (id: number) => void;
+  removeTab: (id: number) => void;
+  updateTabContent: (id: number, content: string) => void;
   handleEditorChange: (id: number, newValue: string) => void;
 }
 
